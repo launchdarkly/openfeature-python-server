@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "launchdarkly-openfeature-server"
+version = "0.1.0"
+description = "An OpenFeature provider for the LaunchDarkly Python server SDK"
+authors = ["LaunchDarkly <dev@launchdarkly.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/launchdarkly/openfeature-python-server"
+documentation = "https://launchdarkly-openfeature-server.readthedocs.io/en/latest/"
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+]
+packages = [
+    { include = "client" },
+    { include = "tests" },
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+openfeature-sdk = "0.4.1"
+launchdarkly-server-sdk = "<10"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=2.8"
+pytest-cov = ">=2.4.0"
+pytest-mypy = "==0.10.3"
+mypy = "==1.8.0"
+
+
+[tool.mypy]
+python_version = "3.8"
+install_types = true
+non_interactive = true
+
+
+[tool.pytest.ini_options]
+addopts = ["-ra"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
