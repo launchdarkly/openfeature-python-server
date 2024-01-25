@@ -21,7 +21,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 packages = [
-    { include = "client" },
+    { include = "ld_openfeature" },
     { include = "tests" },
 ]
 
@@ -37,12 +37,17 @@ pytest = ">=2.8"
 pytest-cov = ">=2.4.0"
 pytest-mypy = "==0.10.3"
 mypy = "==1.8.0"
+isort = "^5.13.2"
 
 
 [tool.mypy]
 python_version = "3.8"
 install_types = true
 non_interactive = true
+
+
+[tool.isort]
+py_version=38
 
 
 [tool.pytest.ini_options]
