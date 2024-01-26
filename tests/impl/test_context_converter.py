@@ -41,7 +41,7 @@ def test_invalid_private_attribute_types_are_ignored(context_converter: Evaluati
 def test_create_multi_context_with_invalid_targeting_key(context_converter: EvaluationContextConverter):
     attributes = {
         'kind': 'multi',
-        'user': {'targeting_key': False, 'key': 'user-key', 'name': 'User name'},
+        'user': {'targetingKey': False, 'key': 'user-key', 'name': 'User name'},
         'org': {'key': 'org-key', 'name': 'Org name'},
     }
     context = EvaluationContext(None, attributes)
@@ -71,7 +71,7 @@ def test_targeting_key_takes_precedence_over_attribute_key(context_converter: Ev
 
 
 def test_targeting_key_in_attributes_is_ignored(context_converter: EvaluationContextConverter):
-    context = EvaluationContext("should-use", {"kind": "org", "key": "do-not-use", "targeting_key": "also-do-not-use"})
+    context = EvaluationContext("should-use", {"kind": "org", "key": "do-not-use", "targetingKey": "also-do-not-use"})
     ld_context = context_converter.to_ld_context(context)
 
     assert ld_context.valid is True

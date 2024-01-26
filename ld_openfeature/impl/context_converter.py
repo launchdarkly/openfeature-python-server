@@ -66,7 +66,7 @@ class EvaluationContextConverter:
                 continue
 
             key = attributes.get('key')
-            targeting_key = attributes.get('targeting_key')
+            targeting_key = attributes.get('targetingKey')
 
             if targeting_key is not None and not isinstance(targeting_key, str):
                 continue
@@ -83,8 +83,7 @@ class EvaluationContextConverter:
         builder.kind(kind)
 
         for k, v in attributes.items():
-            # TODO: In PHP this was camel case. Is that the case for python? Check the docs.
-            if k == 'key' or k == 'targeting_key':
+            if k == 'key' or k == 'targetingKey':
                 continue
 
             if k == 'name' and isinstance(v, str):
