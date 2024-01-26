@@ -1,3 +1,11 @@
+PYTEST_FLAGS=-W error::SyntaxWarning
+
+SPHINXOPTS    = -W --keep-going
+SPHINXBUILD   = sphinx-build
+SPHINXPROJ    = launchdarkly-openfeature-server
+SOURCEDIR     = docs
+BUILDDIR      = $(SOURCEDIR)/build
+
 .PHONY: help
 help: #! Show this help message
 	@echo 'Usage: make [target] ... '
@@ -22,3 +30,13 @@ test: install
 lint: #! Run type analysis and linting checks
 lint: install
 	@poetry run mypy ld_openfeature tests
+
+#
+# Documentation generation
+#
+
+.PHONY: docs
+docs: #! Generate sphinx-based documentation
+	@poetry install --with docs
+	@cd docs
+	@poetry run $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
