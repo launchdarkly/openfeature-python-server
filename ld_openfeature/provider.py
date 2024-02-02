@@ -19,6 +19,9 @@ class LaunchDarklyProvider(AbstractProvider):
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
 
+    def shutdown(self):
+        self.__client.close()
+
     def get_metadata(self) -> Metadata:
         return Metadata("launchdarkly-openfeature-server")
 
