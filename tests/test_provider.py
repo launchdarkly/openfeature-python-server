@@ -1,5 +1,5 @@
 from typing import List, Union
-from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 from ldclient import Config, LDClient
@@ -25,13 +25,13 @@ def evaluation_context() -> EvaluationContext:
 
 
 @pytest.fixture
-def ld_client(test_data_source: TestData) -> LDClient:
-    return LDClient(config=Config("example-key", update_processor_class=test_data_source, send_events=False))
+def config(test_data_source: TestData) -> Config:
+    return Config("example-key", update_processor_class=test_data_source, send_events=False)
 
 
 @pytest.fixture
-def provider(ld_client) -> LaunchDarklyProvider:
-    return LaunchDarklyProvider(ld_client)
+def provider(config) -> LaunchDarklyProvider:
+    return LaunchDarklyProvider(config)
 
 
 def test_metadata_name_is_correct(provider: LaunchDarklyProvider):
@@ -56,11 +56,10 @@ def test_evaluation_results_are_converted_to_details(provider: LaunchDarklyProvi
     assert resolution_details.error_code is None
 
 
-def test_evaluation_error_results_are_converted_correctly(ld_client: LDClient, provider: LaunchDarklyProvider, evaluation_context: EvaluationContext):
+def test_evaluation_error_results_are_converted_correctly(provider: LaunchDarklyProvider, evaluation_context: EvaluationContext):
     detail = EvaluationDetail(True, None, {'kind': 'ERROR', 'errorKind': 'CLIENT_NOT_READY'})
-    ld_client.variation_detail = MagicMock(return_value=detail)  # type: ignore[method-assign]
-
-    resolution_details = provider.resolve_boolean_details("flag-key", True, evaluation_context)
+    with patch.object(LDClient, 'variation_detail', lambda self, _key, _context, _default: detail):
+        resolution_details = provider.resolve_boolean_details("flag-key", True, evaluation_context)
 
     assert resolution_details.value is True
     assert resolution_details.reason == Reason.ERROR
@@ -113,14 +112,13 @@ def test_check_method_and_result_match_type(
         expected_value: Union[bool, str, int, float, List],
         method_name: str,
         # end of parameterized values
-        ld_client: LDClient,
+        test_data_source: TestData,
         provider: LaunchDarklyProvider,
         evaluation_context: EvaluationContext):
-    detail = EvaluationDetail(return_value, 1, {'kind': 'FALLTHROUGH'})
-    ld_client.variation_detail = MagicMock(return_value=detail)  # type: ignore[method-assign]
+    test_data_source.update(test_data_source.flag("check-method-flag").variations(return_value).variation_for_all(0))
 
     method = getattr(provider, method_name)
-    resolution_details = method("flag-key", default_value, evaluation_context)
+    resolution_details = method("check-method-flag", default_value, evaluation_context)
 
     assert resolution_details.value == expected_value
 

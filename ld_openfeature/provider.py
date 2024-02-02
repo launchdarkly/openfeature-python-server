@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Union
 
-from ldclient import LDClient
+from ldclient import LDClient, Config
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import FlagResolutionDetails, FlagType, Reason
@@ -13,8 +13,8 @@ from ld_openfeature.impl.details_converter import ResolutionDetailsConverter
 
 
 class LaunchDarklyProvider(AbstractProvider):
-    def __init__(self, client: LDClient):
-        self.__client = client
+    def __init__(self, config: Config):
+        self.__client = LDClient(config)
 
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
