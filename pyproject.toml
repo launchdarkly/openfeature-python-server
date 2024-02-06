@@ -28,7 +28,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-openfeature-sdk = "0.4.1"
+openfeature-sdk = "0.4.2"
 launchdarkly-server-sdk = "<10"
 
 
