@@ -1,6 +1,6 @@
 # LaunchDarkly OpenFeature provider for the Server-Side SDK for Python
 
-[![Run CI](https://github.com/launchdarkly/openfeature-python-server/actions/workflows/ci.yml/badge.svg)](https://github.com/launchdarkly/openfeature-python-server/actions/workflows/ci.yml)
+[![Quality control checks](https://github.com/launchdarkly/openfeature-python-server/actions/workflows/ci.yml/badge.svg)](https://github.com/launchdarkly/openfeature-python-server/actions/workflows/ci.yml)
 [![Packagist](https://img.shields.io/packagist/v/launchdarkly/openfeature-server.svg?style=flat-square)](https://packagist.org/packages/launchdarkly/openfeature-server)
 [![readthedocs](https://readthedocs.org/projects/launchdarkly-openfeature-server/badge/)](https://launchdarkly-openfeature-server.readthedocs.io/en/latest/)
 
