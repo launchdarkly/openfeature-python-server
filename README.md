@@ -1,8 +1,10 @@
 # LaunchDarkly OpenFeature provider for the Server-Side SDK for Python
 
 [![Quality control checks](https://github.com/launchdarkly/openfeature-python-server/actions/workflows/ci.yml/badge.svg)](https://github.com/launchdarkly/openfeature-python-server/actions/workflows/ci.yml)
-[![Packagist](https://img.shields.io/packagist/v/launchdarkly/openfeature-server.svg?style=flat-square)](https://packagist.org/packages/launchdarkly/openfeature-server)
-[![readthedocs](https://readthedocs.org/projects/launchdarkly-openfeature-server/badge/)](https://launchdarkly-openfeature-server.readthedocs.io/en/latest/)
+[![readthedocs](https://readthedocs.org/projects/launchdarkly-openfeature-python-sdk/badge/)](https://launchdarkly-openfeature-python-sdk.readthedocs.io/en/latest/)
+
+[![PyPI](https://img.shields.io/pypi/v/launchdarkly-openfeature-server.svg?maxAge=2592000)](https://pypi.python.org/pypi/launchdarkly-openfeature-server)
+[![PyPI](https://img.shields.io/pypi/pyversions/launchdarkly-openfeature-server.svg)](https://pypi.python.org/pypi/launchdarkly-openfeature-server)
 
 This provider allows for using LaunchDarkly with the OpenFeature SDK for Python.
 
