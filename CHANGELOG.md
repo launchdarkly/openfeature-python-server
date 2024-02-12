@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.0...0.1.1) (2024-02-12)
+
+
+### Bug Fixes
+
+* Adjust docs and pypi badges ([#6](https://github.com/launchdarkly/openfeature-python-server/issues/6)) ([688175d](https://github.com/launchdarkly/openfeature-python-server/commit/688175d1eaa13186fe061079e01944fc3a153871))
+
 ## 0.1.0 (2024-02-06)
 
 
