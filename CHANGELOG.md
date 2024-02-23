@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.1...0.1.2) (2024-02-23)
+
+
+### Documentation
+
+* Clarify beta version warning and dependencies ([#8](https://github.com/launchdarkly/openfeature-python-server/issues/8)) ([6576453](https://github.com/launchdarkly/openfeature-python-server/commit/65764536ace64875a007def5f1881e59a533539b))
+
 ## [0.1.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.0...0.1.1) (2024-02-12)
 
 
