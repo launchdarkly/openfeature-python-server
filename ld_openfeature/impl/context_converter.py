@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Any, Dict, List, Optional
 
 from ldclient.context import Context, ContextBuilder, ContextMultiBuilder
-from openfeature.provider.provider import EvaluationContext
+from openfeature.evaluation_context import EvaluationContext
 
 
 logger = getLogger("launchdarkly-openfeature-server")
