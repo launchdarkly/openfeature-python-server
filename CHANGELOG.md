@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.1...0.1.2) (2024-05-03)
+
+
+### Bug Fixes
+
+* Use canonical import paths for openfeature classes ([#11](https://github.com/launchdarkly/openfeature-python-server/issues/11)) ([e60ec31](https://github.com/launchdarkly/openfeature-python-server/commit/e60ec315812952933cb253b6628ef5446f62edc6))
+
+
+### Documentation
+
+* Clarify beta version warning and dependencies ([#8](https://github.com/launchdarkly/openfeature-python-server/issues/8)) ([6576453](https://github.com/launchdarkly/openfeature-python-server/commit/65764536ace64875a007def5f1881e59a533539b))
+* Fix readthedocs generation ([#10](https://github.com/launchdarkly/openfeature-python-server/issues/10)) ([da5283d](https://github.com/launchdarkly/openfeature-python-server/commit/da5283d1e8e417a43d63acfd5ee1d045fd63651c))
+
 ## [0.1.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.0...0.1.1) (2024-02-12)
 
 
