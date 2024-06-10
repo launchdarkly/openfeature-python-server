@@ -232,12 +232,15 @@ def test_provider_emits_stale_event():
 
     api.shutdown()
 
+
 def test_provider_emits_configuration_event():
     thread_event = threading.Event()
 
     provider = LaunchDarklyProvider(Config("", update_processor_class=UpdatingDataSource, send_events=False))
 
     def handle_change(details: EventDetails):
+        assert details.flags_changed is not None
+        assert len(details.flags_changed) == 1
         assert details.flags_changed[0] == "potato"
         thread_event.set()
 
