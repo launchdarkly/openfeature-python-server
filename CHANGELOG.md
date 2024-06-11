@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.2...0.2.0) (2024-06-11)
+
+
+### Features
+
+* Add support for provider events. ([#12](https://github.com/launchdarkly/openfeature-python-server/issues/12)) ([c69231a](https://github.com/launchdarkly/openfeature-python-server/commit/c69231a48a6483d789d99474e6ae3d83ffcb18d1))
+
 ## [0.1.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.1...0.1.2) (2024-05-03)
 
 
