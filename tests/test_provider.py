@@ -177,12 +177,7 @@ def test_provider_emits_error_event_immediately_failed():
     openfeature_provider = LaunchDarklyProvider(
         Config("", update_processor_class=FailingDataSource, send_events=False))
 
-    try:
-        api.set_provider(openfeature_provider)
-        # The method should throw
-        assert False
-    except Exception:
-        pass
+    api.set_provider(openfeature_provider)
 
     with lock:
         assert ld_provider_error_count == 1
