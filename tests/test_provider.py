@@ -1,3 +1,4 @@
+import threading
 from typing import List, Union
 from unittest.mock import patch
 
@@ -6,10 +7,13 @@ from ldclient import Config, LDClient
 from ldclient.evaluation import EvaluationDetail
 from ldclient.integrations.test_data import TestData
 from openfeature.evaluation_context import EvaluationContext
+from openfeature.event import ProviderEvent, EventDetails
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import Reason
+from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider
+from tests.test_data_sources import FailingDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 
 
 @pytest.fixture
@@ -47,7 +51,8 @@ def test_not_providing_context_returns_error(provider: LaunchDarklyProvider):
     assert resolution_details.error_code == ErrorCode.TARGETING_KEY_MISSING
 
 
-def test_evaluation_results_are_converted_to_details(provider: LaunchDarklyProvider, evaluation_context: EvaluationContext):
+def test_evaluation_results_are_converted_to_details(provider: LaunchDarklyProvider,
+                                                     evaluation_context: EvaluationContext):
     resolution_details = provider.resolve_boolean_details("fallthrough-boolean", True, evaluation_context)
 
     assert resolution_details.value is True
@@ -56,7 +61,8 @@ def test_evaluation_results_are_converted_to_details(provider: LaunchDarklyProvi
     assert resolution_details.error_code is None
 
 
-def test_evaluation_error_results_are_converted_correctly(provider: LaunchDarklyProvider, evaluation_context: EvaluationContext):
+def test_evaluation_error_results_are_converted_correctly(provider: LaunchDarklyProvider,
+                                                          evaluation_context: EvaluationContext):
     detail = EvaluationDetail(True, None, {'kind': 'ERROR', 'errorKind': 'CLIENT_NOT_READY'})
     with patch.object(LDClient, 'variation_detail', lambda self, _key, _context, _default: detail):
         resolution_details = provider.resolve_boolean_details("flag-key", True, evaluation_context)
@@ -67,7 +73,8 @@ def test_evaluation_error_results_are_converted_correctly(provider: LaunchDarkly
     assert resolution_details.error_code == ErrorCode.PROVIDER_NOT_READY
 
 
-def test_invalid_types_generate_type_mismatch_results(provider: LaunchDarklyProvider, evaluation_context: EvaluationContext):
+def test_invalid_types_generate_type_mismatch_results(provider: LaunchDarklyProvider,
+                                                      evaluation_context: EvaluationContext):
     resolution_details = provider.resolve_string_details("fallthrough-boolean", "default-value", evaluation_context)
 
     assert resolution_details.value == "default-value"
@@ -128,3 +135,111 @@ def test_logger_changes_should_cascade_to_evaluation_converter(provider: LaunchD
 
     assert len(caplog.records) == 1
     assert caplog.records[0].message == "'kind' was set to a non-string value; defaulting to user"
+
+
+def test_provider_emits_ready_event_when_immediately_ready():
+    ld_provider_ready_count = 0
+    lock = threading.Lock()
+
+    def handle_status(details: EventDetails):
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            nonlocal lock
+            nonlocal ld_provider_ready_count
+            with lock:
+                ld_provider_ready_count = ld_provider_ready_count + 1
+
+    # At the time of implementation this handler runs synchronously on the same
+    # thread as initialization. The lock is in case this behavior changes.
+    api.add_handler(ProviderEvent.PROVIDER_READY, handle_status)
+
+    openfeature_provider = LaunchDarklyProvider(Config("", offline=True))
+    api.set_provider(openfeature_provider)
+
+    with lock:
+        assert ld_provider_ready_count == 1
+
+    api.shutdown()
+
+
+def test_provider_emits_error_event_immediately_failed():
+    ld_provider_error_count = 0
+    lock = threading.Lock()
+
+    def handle_status(details: EventDetails):
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            nonlocal lock
+            nonlocal ld_provider_error_count
+            with lock:
+                ld_provider_error_count = ld_provider_error_count + 1
+
+    api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
+
+    openfeature_provider = LaunchDarklyProvider(
+        Config("", update_processor_class=FailingDataSource, send_events=False))
+
+    api.set_provider(openfeature_provider)
+
+    with lock:
+        assert ld_provider_error_count == 1
+
+    api.shutdown()
+
+
+def test_provider_emits_error_event_delayed_failure():
+    ld_provider_error_count = 0
+    lock = threading.Lock()
+
+    def handle_status(details: EventDetails):
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            nonlocal lock
+            nonlocal ld_provider_error_count
+            with lock:
+                ld_provider_error_count = ld_provider_error_count + 1
+
+    api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
+
+    openfeature_provider = LaunchDarklyProvider(
+        Config("", update_processor_class=DelayedFailingDataSource, send_events=False))
+
+    api.set_provider(openfeature_provider)
+
+    with lock:
+        assert ld_provider_error_count == 1
+
+    api.shutdown()
+
+
+def test_provider_emits_stale_event():
+    thread_event = threading.Event()
+
+    def handle_status(details: EventDetails):
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            thread_event.set()
+
+    api.add_handler(ProviderEvent.PROVIDER_STALE, handle_status)
+
+    openfeature_provider = LaunchDarklyProvider(Config("", update_processor_class=StaleDataSource, send_events=False))
+    api.set_provider(openfeature_provider)
+
+    assert thread_event.wait(timeout=5)
+
+    api.shutdown()
+
+
+def test_provider_emits_configuration_event():
+    thread_event = threading.Event()
+
+    provider = LaunchDarklyProvider(Config("", update_processor_class=UpdatingDataSource, send_events=False))
+
+    def handle_change(details: EventDetails):
+        assert details.flags_changed is not None
+        assert len(details.flags_changed) == 1
+        assert details.flags_changed[0] == "potato"
+        thread_event.set()
+
+    api.add_handler(ProviderEvent.PROVIDER_CONFIGURATION_CHANGED, handle_change)
+    api.set_provider(provider)
+
+    assert thread_event.wait(timeout=5)
+
+    api.shutdown()
