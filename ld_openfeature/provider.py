@@ -85,46 +85,46 @@ class LaunchDarklyProvider(AbstractProvider):
         return []
 
     def resolve_boolean_details(
-            self,
-            flag_key: str,
-            default_value: bool,
-            evaluation_context: Optional[EvaluationContext] = None,
+        self,
+        flag_key: str,
+        default_value: bool,
+        evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[bool]:
         """Resolves the flag value for the provided flag key as a boolean"""
         return self.__resolve_value(FlagType(FlagType.BOOLEAN), flag_key, default_value, evaluation_context)
 
     def resolve_string_details(
-            self,
-            flag_key: str,
-            default_value: str,
-            evaluation_context: Optional[EvaluationContext] = None,
+        self,
+        flag_key: str,
+        default_value: str,
+        evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[str]:
         """Resolves the flag value for the provided flag key as a string"""
         return self.__resolve_value(FlagType(FlagType.STRING), flag_key, default_value, evaluation_context)
 
     def resolve_integer_details(
-            self,
-            flag_key: str,
-            default_value: int,
-            evaluation_context: Optional[EvaluationContext] = None,
+        self,
+        flag_key: str,
+        default_value: int,
+        evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[int]:
         """Resolves the flag value for the provided flag key as a integer"""
         return self.__resolve_value(FlagType(FlagType.INTEGER), flag_key, default_value, evaluation_context)
 
     def resolve_float_details(
-            self,
-            flag_key: str,
-            default_value: float,
-            evaluation_context: Optional[EvaluationContext] = None,
+        self,
+        flag_key: str,
+        default_value: float,
+        evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[float]:
         """Resolves the flag value for the provided flag key as a float"""
         return self.__resolve_value(FlagType(FlagType.FLOAT), flag_key, default_value, evaluation_context)
 
     def resolve_object_details(
-            self,
-            flag_key: str,
-            default_value: Union[dict, list],
-            evaluation_context: Optional[EvaluationContext] = None,
+        self,
+        flag_key: str,
+        default_value: Union[dict, list],
+        evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[Union[dict, list]]:
         """Resolves the flag value for the provided flag key as a list or dictionary"""
         return self.__resolve_value(FlagType(FlagType.OBJECT), flag_key, default_value, evaluation_context)
