@@ -210,7 +210,6 @@ def test_provider_emits_error_event_delayed_failure():
 
     with lock:
         assert ld_provider_error_count == 1
-    pass
 
     api.shutdown()
 
