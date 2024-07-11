@@ -14,7 +14,7 @@ This provider is designed primarily for use in multi-user systems such as web se
 > This is a beta version. The API is not stabilized and may introduce breaking changes.
 
 > [!NOTE]
-> This OpenFeature provider uses production versions of the LaunchDarkly SDK, which adhere to our standard [versioning policy](https://docs.launchdarkly.com/home/relay-proxy/versioning).
+> This OpenFeature provider uses production versions of the LaunchDarkly SDK, which adhere to our standard [versioning policy](https://docs.launchdarkly.com/sdk/concepts/versioning).
 
 # LaunchDarkly overview
 
@@ -39,13 +39,11 @@ $ pip install launchdarkly-openfeature-server
 ### Usage
 
 ```python
-from ldclient import Config, LDClient
+from ldclient import Config
 from ld_openfeature import LaunchDarklyProvider
-from openfeature.evaluation_context import EvaluationContext
 from openfeature import api
 
-ld_client = LDClient(config=Config("sdk-key"))
-openfeature_provider = LaunchDarklyProvider(ld_client)
+openfeature_provider = LaunchDarklyProvider(Config("sdk-key"))
 
 api.set_provider(openfeature_provider)
 
