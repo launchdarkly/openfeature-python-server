@@ -156,6 +156,31 @@ def test_can_create_multi_kind_context(context_converter: EvaluationContextConve
     assert org_context.name == 'Org name'
 
 
+def test_can_multi_kind_ignores_kind_attribute(context_converter: EvaluationContextConverter):
+    attributes = {
+        'kind': 'multi',
+        'user': {'key': 'user-key', 'kind': 'device', 'name': 'User name'},
+        'org': {'key': 'org-key', 'name': 'Org name'},
+    }
+    context = EvaluationContext(None, attributes)
+    ld_context = context_converter.to_ld_context(context)
+
+    assert ld_context.valid is True
+    assert ld_context.multiple is True
+
+    user_context = ld_context.get_individual_context('user')
+    assert user_context is not None
+    assert user_context.key == 'user-key'
+    assert user_context.kind == 'user'
+    assert user_context.name == 'User name'
+
+    org_context = ld_context.get_individual_context('org')
+    assert org_context is not None
+    assert org_context.key == 'org-key'
+    assert org_context.kind == 'org'
+    assert org_context.name == 'Org name'
+
+
 def test_multi_context_discards_invalid_single_kind(context_converter: EvaluationContextConverter):
     attributes = {
         'kind': 'multi',
