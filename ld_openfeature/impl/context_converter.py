@@ -49,7 +49,7 @@ class EvaluationContextConverter:
         if key is not None and isinstance(key, str):
             targeting_key = targeting_key if targeting_key else key
 
-        if targeting_key is None or targeting_key == "":
+        if targeting_key is None or targeting_key == "" or not isinstance(targeting_key, str):
             logger.error("The EvaluationContext must contain either a 'targetingKey' or a 'key' and the type must be a string.")
 
         return targeting_key if targeting_key else ""

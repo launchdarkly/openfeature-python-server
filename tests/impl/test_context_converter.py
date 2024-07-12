@@ -28,6 +28,16 @@ def test_create_context_with_invalid_key(context_converter: EvaluationContextCon
     assert caplog.records[0].message == "A non-string 'key' attribute was provided."
 
 
+def test_create_context_with_invalid_targeting_key(context_converter: EvaluationContextConverter, caplog):
+    context = EvaluationContext(False)
+    ld_context = context_converter.to_ld_context(context)
+
+    assert ld_context.valid is False
+    assert ld_context.key == ''
+
+    assert caplog.records[0].message == "The EvaluationContext must contain either a 'targetingKey' or a 'key' and the type must be a string."
+
+
 def test_invalid_private_attribute_types_are_ignored(context_converter: EvaluationContextConverter, caplog):
     context = EvaluationContext("user-key", {"privateAttributes": [True]})
     ld_context = context_converter.to_ld_context(context)
