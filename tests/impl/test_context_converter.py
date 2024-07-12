@@ -29,7 +29,7 @@ def test_create_context_with_invalid_key(context_converter: EvaluationContextCon
 
 
 def test_create_context_with_invalid_targeting_key(context_converter: EvaluationContextConverter, caplog):
-    context = EvaluationContext(False)
+    context = EvaluationContext(False)  # type: ignore[arg-type]
     ld_context = context_converter.to_ld_context(context)
 
     assert ld_context.valid is False
