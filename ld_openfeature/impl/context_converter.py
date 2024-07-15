@@ -83,7 +83,7 @@ class EvaluationContextConverter:
         builder.kind(kind)
 
         for k, v in attributes.items():
-            if k == 'key' or k == 'targetingKey':
+            if k == 'key' or k == 'targetingKey' or k == 'kind':
                 continue
 
             if k == 'name' and isinstance(v, str):
