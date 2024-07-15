@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.2.0...0.2.1) (2024-07-15)
+
+
+### Bug Fixes
+
+* Ignore embedded kind when processing multi-kind contexts ([#15](https://github.com/launchdarkly/openfeature-python-server/issues/15)) ([dd17a4c](https://github.com/launchdarkly/openfeature-python-server/commit/dd17a4c2cc69804eff1faa2c45b84b0048a816e8))
+* Log warning if targeting key is not a string ([#16](https://github.com/launchdarkly/openfeature-python-server/issues/16)) ([7a8c835](https://github.com/launchdarkly/openfeature-python-server/commit/7a8c835f39caf25791989d521d1f44d18d9c5586))
+
+
+### Documentation
+
+* Fix usage to reflect latest refactor ([#14](https://github.com/launchdarkly/openfeature-python-server/issues/14)) ([ba4e662](https://github.com/launchdarkly/openfeature-python-server/commit/ba4e6621bbf03977e7a8dc8bbe36171609a21f61))
+
 ## [0.2.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.1.2...0.2.0) (2024-06-11)
 
 
