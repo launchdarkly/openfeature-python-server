@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.2.1...0.2.2) (2024-09-20)
+
+
+### Bug Fixes
+
+* Correct project documentation link ([#19](https://github.com/launchdarkly/openfeature-python-server/issues/19)) ([bcc2573](https://github.com/launchdarkly/openfeature-python-server/commit/bcc25731069146db6931223751c8dfa74e5ac1c0))
+
 ## [0.2.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.2.0...0.2.1) (2024-07-15)
 
 
