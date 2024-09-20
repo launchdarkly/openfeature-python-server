@@ -6,7 +6,7 @@ authors = ["LaunchDarkly <dev@launchdarkly.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/launchdarkly/openfeature-python-server"
-documentation = "https://launchdarkly-openfeature-server.readthedocs.io/en/latest/"
+documentation = "https://launchdarkly-openfeature-python-sdk.readthedocs.io/en/latest/"
 classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
