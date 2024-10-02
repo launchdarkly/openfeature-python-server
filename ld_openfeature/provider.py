@@ -22,6 +22,15 @@ class LaunchDarklyProvider(AbstractProvider):
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
 
+    @property
+    def client(self) -> LDClient:
+        """
+        Access the underlying LaunchDarky client instance backing this provider.
+
+        This is useful for accessing additional functionality not exposed by the provider.
+        """
+        return self.__client
+
     def __handle_data_source_status(self, status: DataSourceStatus):
         state = status.state
         if state == DataSourceState.INITIALIZING:
