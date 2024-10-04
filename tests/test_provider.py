@@ -42,6 +42,10 @@ def test_metadata_name_is_correct(provider: LaunchDarklyProvider):
     assert provider.get_metadata().name == "launchdarkly-openfeature-server"
 
 
+def test_ldclient_is_accessible(provider: LaunchDarklyProvider):
+    assert type(provider.client) is LDClient
+
+
 def test_not_providing_context_returns_error(provider: LaunchDarklyProvider):
     resolution_details = provider.resolve_boolean_details("flag-key", True, None)
 
