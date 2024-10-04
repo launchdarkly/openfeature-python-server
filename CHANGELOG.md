@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.2.2...0.3.0) (2024-10-04)
+
+
+### Features
+
+* Expose LDClient from provider ([#21](https://github.com/launchdarkly/openfeature-python-server/issues/21)) ([4d391c0](https://github.com/launchdarkly/openfeature-python-server/commit/4d391c0679c5c3264c70933df55d428c0b5d2319))
+
 ## [0.2.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.2.1...0.2.2) (2024-09-20)
 
 
