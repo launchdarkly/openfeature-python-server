@@ -12,11 +12,11 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development",
     "Topic :: Software Development :: Libraries",
 ]
@@ -27,7 +27,7 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 openfeature-sdk = ">=0.7.0,<1"
 launchdarkly-server-sdk = "<10"
 
@@ -56,13 +56,13 @@ jinja2 = "3.1.3"
 
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 install_types = true
 non_interactive = true
 
 
 [tool.isort]
-py_version=38
+py_version=39
 
 
 [tool.pytest.ini_options]
