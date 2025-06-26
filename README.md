@@ -24,7 +24,7 @@ This provider is designed primarily for use in multi-user systems such as web se
 
 ## Supported Python versions
 
-This version of the LaunchDarkly provider works with Python 3.8 and above.
+This version of the LaunchDarkly provider works with Python 3.9 and above.
 
 ## Getting started
 
