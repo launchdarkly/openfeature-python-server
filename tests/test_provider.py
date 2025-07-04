@@ -88,32 +88,37 @@ def test_invalid_types_generate_type_mismatch_results(provider: LaunchDarklyProv
 
 
 @pytest.mark.parametrize(
-    "default_value,return_value,expected_value,method_name",
-    [
-        pytest.param(True, False, False, 'resolve_boolean_details'),
-        pytest.param(False, True, True, 'resolve_boolean_details'),
-        pytest.param(False, 1, False, 'resolve_boolean_details'),
-        pytest.param(False, "True", False, 'resolve_boolean_details'),
-        pytest.param(True, [], True, 'resolve_boolean_details'),
+    "default_value,return_value,expected_value,expected_type,method_name",
+        [
+        pytest.param(True, False, False, bool, 'resolve_boolean_details'),
+        pytest.param(False, True, True, bool, 'resolve_boolean_details'),
+        pytest.param(False, 1, False, bool, 'resolve_boolean_details'),
+        pytest.param(False, "True", False, bool, 'resolve_boolean_details'),
+        pytest.param(True, [], True, bool, 'resolve_boolean_details'),
 
-        pytest.param('default-string', 'return-string', 'return-string', 'resolve_string_details'),
-        pytest.param('default-string', 1, 'default-string', 'resolve_string_details'),
-        pytest.param('default-string', True, 'default-string', 'resolve_string_details'),
+        pytest.param('default-string', 'return-string', 'return-string', str, 'resolve_string_details'),
+        pytest.param('default-string', 1, 'default-string', str, 'resolve_string_details'),
+        pytest.param('default-string', True, 'default-string', str, 'resolve_string_details'),
 
-        pytest.param(1, 2, 2, 'resolve_integer_details'),
-        pytest.param(1, True, 1, 'resolve_integer_details'),
-        pytest.param(1, False, 1, 'resolve_integer_details'),
-        pytest.param(1, "", 1, 'resolve_integer_details'),
+        pytest.param(1, 2, 2, int, 'resolve_integer_details'),
+        pytest.param(1, True, 1, int, 'resolve_integer_details'),
+        pytest.param(1, False, 1, int, 'resolve_integer_details'),
+        pytest.param(1, "", 1, int, 'resolve_integer_details'),
 
-        pytest.param(1.0, 2.0, 2.0, 'resolve_float_details'),
-        pytest.param(1.0, 2, 2.0, 'resolve_float_details'),
-        pytest.param(1.0, True, 1.0, 'resolve_float_details'),
-        pytest.param(1.0, 'return-string', 1.0, 'resolve_float_details'),
+        pytest.param(1.0, 2.0, 2.0, float, 'resolve_float_details'),
+        pytest.param(1.0, 2, 2.0, float, 'resolve_float_details'),
+        pytest.param(1.0, True, 1.0, float, 'resolve_float_details'),
+        pytest.param(1.0, 'return-string', 1.0, float, 'resolve_float_details'),
 
-        pytest.param(['default-value'], ['return-string'], ['return-string'], 'resolve_object_details'),
-        pytest.param(['default-value'], True, ['default-value'], 'resolve_object_details'),
-        pytest.param(['default-value'], 1, ['default-value'], 'resolve_object_details'),
-        pytest.param(['default-value'], 'return-string', ['default-value'], 'resolve_object_details'),
+        pytest.param(['default-value'], ['return-string'], ['return-string'], list, 'resolve_object_details'),
+        pytest.param(['default-value'], True, ['default-value'], list, 'resolve_object_details'),
+        pytest.param(['default-value'], 1, ['default-value'], list, 'resolve_object_details'),
+        pytest.param(['default-value'], 'return-string', ['default-value'], list, 'resolve_object_details'),
+        
+        pytest.param({'key': 'default'}, {'key': 'return'}, {'key': 'return'}, dict, 'resolve_object_details'),
+        pytest.param({'key': 'default'}, True, {'key': 'default'}, dict, 'resolve_object_details'),
+        pytest.param({'key': 'default'}, 1, {'key': 'default'}, dict, 'resolve_object_details'),
+        pytest.param({'key': 'default'}, 'return-string', {'key': 'default'}, dict, 'resolve_object_details'),
     ],
 )
 def test_check_method_and_result_match_type(
@@ -121,6 +126,7 @@ def test_check_method_and_result_match_type(
         default_value: Union[bool, str, int, float, List],
         return_value: Union[bool, str, int, float, List],
         expected_value: Union[bool, str, int, float, List],
+        expected_type: type,
         method_name: str,
         # end of parameterized values
         test_data_source: TestData,
@@ -130,7 +136,8 @@ def test_check_method_and_result_match_type(
 
     method = getattr(provider, method_name)
     resolution_details = method("check-method-flag", default_value, evaluation_context)
-
+    
+    assert isinstance(resolution_details.value, expected_type)
     assert resolution_details.value == expected_value
 
 
