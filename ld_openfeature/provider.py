@@ -1,6 +1,7 @@
 import threading
 from typing import Any, List, Optional, Union
 
+from ldclient.evaluation import EvaluationDetail
 from ldclient import LDClient, Config
 from ldclient.interfaces import DataSourceStatus, FlagChange, DataSourceState
 from openfeature.evaluation_context import EvaluationContext
@@ -150,24 +151,31 @@ class LaunchDarklyProvider(AbstractProvider):
         ld_context = self.__context_converter.to_ld_context(evaluation_context)
         result = self.__client.variation_detail(flag_key, ld_context, default_value)
 
-        if flag_type == FlagType.BOOLEAN and not isinstance(result.value, bool):
+        resolved_value = self.__validate_and_cast_value(flag_type, result.value)
+        if resolved_value is None:
             return self.__mismatched_type_details(default_value)
-        elif flag_type == FlagType.STRING and not isinstance(result.value, str):
-            return self.__mismatched_type_details(default_value)
-        elif flag_type == FlagType.INTEGER and isinstance(result.value, bool):
-            # Python treats boolean values as instances of int
-            return self.__mismatched_type_details(default_value)
-        elif flag_type == FlagType.FLOAT and isinstance(result.value, bool):
-            # Python treats boolean values as instances of int
-            return self.__mismatched_type_details(default_value)
-        elif flag_type == FlagType.INTEGER and not isinstance(result.value, int):
-            return self.__mismatched_type_details(default_value)
-        elif flag_type == FlagType.FLOAT and not isinstance(result.value, float) and not isinstance(result.value, int):
-            return self.__mismatched_type_details(default_value)
-        elif flag_type == FlagType.OBJECT and not isinstance(result.value, dict) and not isinstance(result.value, list):
-            return self.__mismatched_type_details(default_value)
-
-        return self.__details_converter.to_resolution_details(result)
+        
+        resolved_detail = EvaluationDetail(
+            value=resolved_value,
+            variation_index=result.variation_index,
+            reason=result.reason,
+        )
+        
+        return self.__details_converter.to_resolution_details(resolved_detail)
+    
+    def __validate_and_cast_value(self, flag_type: FlagType, value: Any):
+        """Serializes the raw flag value to the expected type based on flag_type."""
+        if flag_type == FlagType.BOOLEAN and isinstance(value, bool):
+                return value
+        elif flag_type == FlagType.STRING and isinstance(value, str):
+                return value
+        elif flag_type == FlagType.INTEGER and isinstance(value, (int, float)) and not isinstance(value, bool):
+                return int(value) # Float decimals are truncated to int
+        elif flag_type == FlagType.FLOAT and isinstance(value, (int, float)) and not isinstance(value, bool):
+                return float(value)
+        elif flag_type == FlagType.OBJECT and isinstance(value, (dict, list)):
+                return value
+        return None 
 
     @staticmethod
     def __mismatched_type_details(default_value: Any) -> FlagResolutionDetails:
