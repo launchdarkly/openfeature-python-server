@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.4.0...0.4.1) (2025-07-07)
+
+
+### Bug Fixes
+
+* Gracefully cast for numeric flag evaluations ([#27](https://github.com/launchdarkly/openfeature-python-server/issues/27)) ([7429f28](https://github.com/launchdarkly/openfeature-python-server/commit/7429f28824fadfb994960dcd698e89761aebe44e))
+
 ## [0.4.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.3.0...0.4.0) (2025-06-26)
 
 
