@@ -138,20 +138,6 @@ class LaunchDarklyProvider(AbstractProvider):
     ) -> FlagResolutionDetails[Union[dict, list]]:
         """Resolves the flag value for the provided flag key as a list or dictionary"""
         return self.__resolve_value(FlagType(FlagType.OBJECT), flag_key, default_value, evaluation_context)
-    
-    def serialize_value(self, flag_type: FlagType, value: Any):
-        """Serializes the raw flag value to the expected type based on flag_type."""
-        if flag_type == FlagType.BOOLEAN and isinstance(value, bool):
-                return value
-        elif flag_type == FlagType.STRING and isinstance(value, str):
-                return value
-        elif flag_type == FlagType.INTEGER and isinstance(value, (int, float)) and not isinstance(value, bool):
-                return int(value)
-        elif flag_type == FlagType.FLOAT and isinstance(value, (int, float)) and not isinstance(value, bool):
-                return float(value)
-        elif flag_type == FlagType.OBJECT and isinstance(value, (dict, list)):
-                return value
-        return None 
 
     def __resolve_value(self, flag_type: FlagType, flag_key: str, default_value: Any,
                         evaluation_context: Optional[EvaluationContext] = None) -> FlagResolutionDetails:
@@ -165,7 +151,7 @@ class LaunchDarklyProvider(AbstractProvider):
         ld_context = self.__context_converter.to_ld_context(evaluation_context)
         result = self.__client.variation_detail(flag_key, ld_context, default_value)
 
-        resolved_value = self.serialize_value(flag_type, result.value)
+        resolved_value = self.__validate_and_cast_value(flag_type, result.value)
         if resolved_value is None:
             return self.__mismatched_type_details(default_value)
         
@@ -176,6 +162,20 @@ class LaunchDarklyProvider(AbstractProvider):
         )
         
         return self.__details_converter.to_resolution_details(resolved_detail)
+    
+    def __validate_and_cast_value(self, flag_type: FlagType, value: Any):
+        """Serializes the raw flag value to the expected type based on flag_type."""
+        if flag_type == FlagType.BOOLEAN and isinstance(value, bool):
+                return value
+        elif flag_type == FlagType.STRING and isinstance(value, str):
+                return value
+        elif flag_type == FlagType.INTEGER and isinstance(value, (int, float)) and not isinstance(value, bool):
+                return int(value) # Float decimals are truncated to int
+        elif flag_type == FlagType.FLOAT and isinstance(value, (int, float)) and not isinstance(value, bool):
+                return float(value)
+        elif flag_type == FlagType.OBJECT and isinstance(value, (dict, list)):
+                return value
+        return None 
 
     @staticmethod
     def __mismatched_type_details(default_value: Any) -> FlagResolutionDetails:

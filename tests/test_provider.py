@@ -104,11 +104,14 @@ def test_invalid_types_generate_type_mismatch_results(provider: LaunchDarklyProv
         pytest.param(1, True, 1, int, 'resolve_integer_details'),
         pytest.param(1, False, 1, int, 'resolve_integer_details'),
         pytest.param(1, "", 1, int, 'resolve_integer_details'),
+        pytest.param(1, 2.0, 2, int, 'resolve_integer_details'),
+        pytest.param(1, 2.9, 2, int, 'resolve_integer_details'),
 
         pytest.param(1.0, 2.0, 2.0, float, 'resolve_float_details'),
         pytest.param(1.0, 2, 2.0, float, 'resolve_float_details'),
         pytest.param(1.0, True, 1.0, float, 'resolve_float_details'),
         pytest.param(1.0, 'return-string', 1.0, float, 'resolve_float_details'),
+        pytest.param(1.0, 2, 2.0, float, 'resolve_float_details'),
 
         pytest.param(['default-value'], ['return-string'], ['return-string'], list, 'resolve_object_details'),
         pytest.param(['default-value'], True, ['default-value'], list, 'resolve_object_details'),
