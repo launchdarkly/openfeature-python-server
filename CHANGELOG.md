@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.4.1...0.4.2) (2025-07-08)
+
+
+### Bug Fixes
+
+* Fixed failing publish process ([#30](https://github.com/launchdarkly/openfeature-python-server/issues/30)) ([1c50d59](https://github.com/launchdarkly/openfeature-python-server/commit/1c50d594ff08aa962ab988759b33b162a83dd127))
+
 ## [0.4.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.4.0...0.4.1) (2025-07-07)
 
 
