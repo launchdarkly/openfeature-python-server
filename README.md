@@ -39,8 +39,7 @@ $ pip install launchdarkly-openfeature-server
 ### Usage
 
 ```python
-from ldclient import Config
-from ld_openfeature import LaunchDarklyProvider
+from ld_openfeature import LaunchDarklyProvider, Config
 from openfeature import api
 
 openfeature_provider = LaunchDarklyProvider(Config("sdk-key"))

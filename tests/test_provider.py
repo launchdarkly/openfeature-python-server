@@ -3,7 +3,7 @@ from typing import List, Union
 from unittest.mock import patch
 
 import pytest
-from ldclient import Config, LDClient
+from ldclient import LDClient
 from ldclient.evaluation import EvaluationDetail
 from ldclient.integrations.test_data import TestData
 from openfeature.evaluation_context import EvaluationContext
@@ -12,7 +12,7 @@ from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import Reason
 from openfeature import api
 
-from ld_openfeature import LaunchDarklyProvider
+from ld_openfeature import LaunchDarklyProvider, Config
 from tests.test_data_sources import FailingDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 
 
@@ -115,7 +115,7 @@ def test_invalid_types_generate_type_mismatch_results(provider: LaunchDarklyProv
         pytest.param(['default-value'], True, ['default-value'], list, 'resolve_object_details'),
         pytest.param(['default-value'], 1, ['default-value'], list, 'resolve_object_details'),
         pytest.param(['default-value'], 'return-string', ['default-value'], list, 'resolve_object_details'),
-        
+
         pytest.param({'key': 'default'}, {'key': 'return'}, {'key': 'return'}, dict, 'resolve_object_details'),
         pytest.param({'key': 'default'}, True, {'key': 'default'}, dict, 'resolve_object_details'),
         pytest.param({'key': 'default'}, 1, {'key': 'default'}, dict, 'resolve_object_details'),
@@ -137,7 +137,7 @@ def test_check_method_and_result_match_type(
 
     method = getattr(provider, method_name)
     resolution_details = method("check-method-flag", default_value, evaluation_context)
-    
+
     assert resolution_details.value == expected_value
     #assert isinstance(resolution_details.value, expected_type)
 
