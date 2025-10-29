@@ -1,5 +1,6 @@
+from typing import Mapping
 import pytest
-from openfeature.evaluation_context import EvaluationContext
+from openfeature.evaluation_context import EvaluationContext, EvaluationContextAttribute
 
 from ld_openfeature.impl.context_converter import EvaluationContextConverter
 
@@ -49,7 +50,7 @@ def test_invalid_private_attribute_types_are_ignored(context_converter: Evaluati
 
 
 def test_create_multi_context_with_invalid_targeting_key(context_converter: EvaluationContextConverter):
-    attributes = {
+    attributes: Mapping[str, EvaluationContextAttribute] = {
         'kind': 'multi',
         'user': {'targetingKey': False, 'key': 'user-key', 'name': 'User name'},
         'org': {'key': 'org-key', 'name': 'Org name'},
@@ -142,7 +143,7 @@ def test_private_attributes_are_processed_correctly(context_converter: Evaluatio
 
 
 def test_can_create_multi_kind_context(context_converter: EvaluationContextConverter):
-    attributes = {
+    attributes: Mapping[str, EvaluationContextAttribute] = {
         'kind': 'multi',
         'user': {'key': 'user-key', 'name': 'User name'},
         'org': {'key': 'org-key', 'name': 'Org name'},
@@ -167,7 +168,7 @@ def test_can_create_multi_kind_context(context_converter: EvaluationContextConve
 
 
 def test_can_multi_kind_ignores_kind_attribute(context_converter: EvaluationContextConverter):
-    attributes = {
+    attributes: Mapping[str, EvaluationContextAttribute] = {
         'kind': 'multi',
         'user': {'key': 'user-key', 'kind': 'device', 'name': 'User name'},
         'org': {'key': 'org-key', 'name': 'Org name'},
@@ -192,7 +193,7 @@ def test_can_multi_kind_ignores_kind_attribute(context_converter: EvaluationCont
 
 
 def test_multi_context_discards_invalid_single_kind(context_converter: EvaluationContextConverter):
-    attributes = {
+    attributes: Mapping[str, EvaluationContextAttribute] = {
         'kind': 'multi',
         'user': False,
         'org': {'key': 'org-key', 'name': 'Org name'},
@@ -208,7 +209,7 @@ def test_multi_context_discards_invalid_single_kind(context_converter: Evaluatio
 
 
 def test_handles_invalid_nested_contexts(context_converter: EvaluationContextConverter):
-    attributes = {
+    attributes: Mapping[str, EvaluationContextAttribute] = {
         'kind': 'multi',
         'user': 'invalid format',
         'org': False

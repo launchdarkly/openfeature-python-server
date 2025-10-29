@@ -1,12 +1,12 @@
 import threading
-from typing import Any, List, Optional, Union
+from typing import Any, List, Mapping, Optional, Sequence, Union
 
 from ldclient.evaluation import EvaluationDetail
 from ldclient import LDClient, Config
 from ldclient.interfaces import DataSourceStatus, FlagChange, DataSourceState
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import ErrorCode, ProviderFatalError
-from openfeature.flag_evaluation import FlagResolutionDetails, FlagType, Reason
+from openfeature.flag_evaluation import FlagResolutionDetails, FlagType, FlagValueType, Reason
 from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
 from openfeature.provider import AbstractProvider
@@ -133,7 +133,9 @@ class LaunchDarklyProvider(AbstractProvider):
     def resolve_object_details(
         self,
         flag_key: str,
-        default_value: Union[dict, list],
+        default_value: Union[
+            Sequence[FlagValueType], Mapping[str, FlagValueType]
+        ],
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[Union[dict, list]]:
         """Resolves the flag value for the provided flag key as a list or dictionary"""
@@ -154,15 +156,15 @@ class LaunchDarklyProvider(AbstractProvider):
         resolved_value = self.__validate_and_cast_value(flag_type, result.value)
         if resolved_value is None:
             return self.__mismatched_type_details(default_value)
-        
+
         resolved_detail = EvaluationDetail(
             value=resolved_value,
             variation_index=result.variation_index,
             reason=result.reason,
         )
-        
+
         return self.__details_converter.to_resolution_details(resolved_detail)
-    
+
     def __validate_and_cast_value(self, flag_type: FlagType, value: Any):
         """Serializes the raw flag value to the expected type based on flag_type."""
         if flag_type == FlagType.BOOLEAN and isinstance(value, bool):
@@ -175,7 +177,7 @@ class LaunchDarklyProvider(AbstractProvider):
                 return float(value)
         elif flag_type == FlagType.OBJECT and isinstance(value, (dict, list)):
                 return value
-        return None 
+        return None
 
     @staticmethod
     def __mismatched_type_details(default_value: Any) -> FlagResolutionDetails:

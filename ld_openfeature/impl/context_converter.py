@@ -1,8 +1,8 @@
 from logging import getLogger
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 
 from ldclient.context import Context, ContextBuilder, ContextMultiBuilder
-from openfeature.evaluation_context import EvaluationContext
+from openfeature.evaluation_context import EvaluationContext, EvaluationContextAttribute
 
 
 logger = getLogger("launchdarkly-openfeature-server")
@@ -78,7 +78,7 @@ class EvaluationContextConverter:
 
         return builder.build()
 
-    def __build_single_context(self, attributes: Dict, kind: str, key: str) -> Context:
+    def __build_single_context(self, attributes: Mapping[str, EvaluationContextAttribute], kind: str, key: str) -> Context:
         builder = ContextBuilder(key)
         builder.kind(kind)
 
