@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.4.2...0.5.0) (2025-10-29)
+
+
+### Features
+
+* Bump openfeature-sdk to v0.8+ ([b0f2c61](https://github.com/launchdarkly/openfeature-python-server/commit/b0f2c619d01a71b9509c8d61e285f1ff661d873e))
+
+
+### Bug Fixes
+
+* Re-export underlying launchdarkly config type ([#33](https://github.com/launchdarkly/openfeature-python-server/issues/33)) ([661426e](https://github.com/launchdarkly/openfeature-python-server/commit/661426e42a13a344a1f05ff60a56c16bc952f231)), closes [#32](https://github.com/launchdarkly/openfeature-python-server/issues/32)
+
 ## [0.4.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.4.1...0.4.2) (2025-07-08)
 
 
