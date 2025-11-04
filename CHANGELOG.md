@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.5.0...0.5.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* Remove tests package ([#37](https://github.com/launchdarkly/openfeature-python-server/issues/37)) ([612c3c4](https://github.com/launchdarkly/openfeature-python-server/commit/612c3c4e774eb6de954047cdcf3a285c9ffeea01)), closes [#36](https://github.com/launchdarkly/openfeature-python-server/issues/36)
+
 ## [0.5.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.4.2...0.5.0) (2025-10-29)
 
 
