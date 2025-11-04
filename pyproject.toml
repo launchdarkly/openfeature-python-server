@@ -22,7 +22,6 @@ classifiers = [
 ]
 packages = [
     { include = "ld_openfeature" },
-    { include = "tests" },
 ]
 
 
