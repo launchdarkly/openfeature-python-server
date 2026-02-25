@@ -29,6 +29,7 @@ test: install
 .PHONY: lint
 lint: #! Run type analysis and linting checks
 lint: install
+	@mkdir -p .mypy_cache
 	@poetry run mypy ld_openfeature tests
 
 #
