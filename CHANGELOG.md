@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.5.1...0.6.0) (2026-02-25)
+
+
+### Features
+
+* Drop support for python 3.9 ([#40](https://github.com/launchdarkly/openfeature-python-server/issues/40)) ([369e120](https://github.com/launchdarkly/openfeature-python-server/commit/369e1203c89c5df23bb38e44b5609b2d5ac8d623))
+
 ## [0.5.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.5.0...0.5.1) (2025-11-04)
 
 
