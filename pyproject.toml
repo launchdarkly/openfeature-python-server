@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "launchdarkly-openfeature-server"
-version = "0.5.1"
+version = "0.6.0"
 description = "An OpenFeature provider for the LaunchDarkly Python server SDK"
 authors = ["LaunchDarkly <dev@launchdarkly.com>"]
 license = "Apache-2.0"
