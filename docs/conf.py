@@ -30,9 +30,9 @@ copyright = u'2024, LaunchDarkly'
 author = u'LaunchDarkly'
 
 # The short X.Y version.
-version = '0.5.1' # x-release-please-version
+version = '0.6.0' # x-release-please-version
 # The full version, including alpha/beta/rc tags.
-release = '0.5.1' # x-release-please-version
+release = '0.6.0' # x-release-please-version
 
 
 # -- General configuration ---------------------------------------------------
