@@ -198,15 +198,11 @@ def test_provider_emits_error_event_immediately_failed():
 
 
 def test_provider_emits_error_event_delayed_failure():
-    ld_provider_error_count = 0
-    lock = threading.Lock()
+    thread_event = threading.Event()
 
     def handle_status(details: EventDetails):
         if details.provider_name == 'launchdarkly-openfeature-server':
-            nonlocal lock
-            nonlocal ld_provider_error_count
-            with lock:
-                ld_provider_error_count = ld_provider_error_count + 1
+            thread_event.set()
 
     api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
 
@@ -215,8 +211,7 @@ def test_provider_emits_error_event_delayed_failure():
 
     api.set_provider(openfeature_provider)
 
-    with lock:
-        assert ld_provider_error_count == 1
+    assert thread_event.wait(timeout=5)
 
     api.shutdown()
 
