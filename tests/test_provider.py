@@ -1,4 +1,5 @@
 import threading
+import time
 from typing import List, Union
 from unittest.mock import patch
 
@@ -150,39 +151,42 @@ def test_logger_changes_should_cascade_to_evaluation_converter(provider: LaunchD
 
 
 def test_provider_emits_ready_event_when_immediately_ready():
-    ld_provider_ready_count = 0
+    emission_count = 0
     lock = threading.Lock()
+    thread_event = threading.Event()
 
     def handle_status(details: EventDetails):
         if details.provider_name == 'launchdarkly-openfeature-server':
-            nonlocal lock
-            nonlocal ld_provider_ready_count
+            nonlocal emission_count
             with lock:
-                ld_provider_ready_count = ld_provider_ready_count + 1
+                emission_count += 1
+            thread_event.set()
 
-    # At the time of implementation this handler runs synchronously on the same
-    # thread as initialization. The lock is in case this behavior changes.
     api.add_handler(ProviderEvent.PROVIDER_READY, handle_status)
 
     openfeature_provider = LaunchDarklyProvider(Config("", offline=True))
     api.set_provider(openfeature_provider)
 
+    assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+
     with lock:
-        assert ld_provider_ready_count == 1
+        assert emission_count == 1
 
     api.shutdown()
 
 
 def test_provider_emits_error_event_immediately_failed():
-    ld_provider_error_count = 0
+    emission_count = 0
     lock = threading.Lock()
+    thread_event = threading.Event()
 
     def handle_status(details: EventDetails):
         if details.provider_name == 'launchdarkly-openfeature-server':
-            nonlocal lock
-            nonlocal ld_provider_error_count
+            nonlocal emission_count
             with lock:
-                ld_provider_error_count = ld_provider_error_count + 1
+                emission_count += 1
+            thread_event.set()
 
     api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
 
@@ -191,22 +195,26 @@ def test_provider_emits_error_event_immediately_failed():
 
     api.set_provider(openfeature_provider)
 
+    assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+
     with lock:
-        assert ld_provider_error_count == 1
+        assert emission_count == 1
 
     api.shutdown()
 
 
 def test_provider_emits_error_event_delayed_failure():
-    ld_provider_error_count = 0
+    emission_count = 0
     lock = threading.Lock()
+    thread_event = threading.Event()
 
     def handle_status(details: EventDetails):
         if details.provider_name == 'launchdarkly-openfeature-server':
-            nonlocal lock
-            nonlocal ld_provider_error_count
+            nonlocal emission_count
             with lock:
-                ld_provider_error_count = ld_provider_error_count + 1
+                emission_count += 1
+            thread_event.set()
 
     api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
 
@@ -215,8 +223,11 @@ def test_provider_emits_error_event_delayed_failure():
 
     api.set_provider(openfeature_provider)
 
+    assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+
     with lock:
-        assert ld_provider_error_count == 1
+        assert emission_count == 1
 
     api.shutdown()
 
