@@ -1,4 +1,5 @@
 import threading
+import time
 from typing import List, Union
 from unittest.mock import patch
 
@@ -150,10 +151,15 @@ def test_logger_changes_should_cascade_to_evaluation_converter(provider: LaunchD
 
 
 def test_provider_emits_ready_event_when_immediately_ready():
+    emission_count = 0
+    lock = threading.Lock()
     thread_event = threading.Event()
 
     def handle_status(details: EventDetails):
         if details.provider_name == 'launchdarkly-openfeature-server':
+            nonlocal emission_count
+            with lock:
+                emission_count += 1
             thread_event.set()
 
     api.add_handler(ProviderEvent.PROVIDER_READY, handle_status)
@@ -162,15 +168,24 @@ def test_provider_emits_ready_event_when_immediately_ready():
     api.set_provider(openfeature_provider)
 
     assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+
+    with lock:
+        assert emission_count == 1
 
     api.shutdown()
 
 
 def test_provider_emits_error_event_immediately_failed():
+    emission_count = 0
+    lock = threading.Lock()
     thread_event = threading.Event()
 
     def handle_status(details: EventDetails):
         if details.provider_name == 'launchdarkly-openfeature-server':
+            nonlocal emission_count
+            with lock:
+                emission_count += 1
             thread_event.set()
 
     api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
@@ -181,15 +196,24 @@ def test_provider_emits_error_event_immediately_failed():
     api.set_provider(openfeature_provider)
 
     assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+
+    with lock:
+        assert emission_count == 1
 
     api.shutdown()
 
 
 def test_provider_emits_error_event_delayed_failure():
+    emission_count = 0
+    lock = threading.Lock()
     thread_event = threading.Event()
 
     def handle_status(details: EventDetails):
         if details.provider_name == 'launchdarkly-openfeature-server':
+            nonlocal emission_count
+            with lock:
+                emission_count += 1
             thread_event.set()
 
     api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
@@ -200,6 +224,10 @@ def test_provider_emits_error_event_delayed_failure():
     api.set_provider(openfeature_provider)
 
     assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+
+    with lock:
+        assert emission_count == 1
 
     api.shutdown()
 
