@@ -12,6 +12,7 @@ from openfeature.event import ProviderEvent, EventDetails
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import Reason
 from openfeature.provider import ProviderStatus
+from openfeature.track import TrackingEventDetails
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
@@ -149,6 +150,61 @@ def test_logger_changes_should_cascade_to_evaluation_converter(provider: LaunchD
 
     assert len(caplog.records) == 1
     assert caplog.records[0].message == "'kind' was set to a non-string value; defaulting to user"
+
+
+def test_track_without_context_does_not_send_an_event(provider: LaunchDarklyProvider):
+    with patch.object(LDClient, 'track') as mock_track:
+        provider.track("metric-key", None, None)
+
+    mock_track.assert_not_called()
+
+
+def test_track_without_details_sends_event_without_data(provider: LaunchDarklyProvider,
+                                                        evaluation_context: EvaluationContext):
+    with patch.object(LDClient, 'track') as mock_track:
+        provider.track("metric-key", evaluation_context, None)
+
+    mock_track.assert_called_once()
+    name, context = mock_track.call_args.args
+    assert name == "metric-key"
+    assert context.key == 'user-key'
+
+
+def test_track_sends_attributes_as_data(provider: LaunchDarklyProvider,
+                                        evaluation_context: EvaluationContext):
+    with patch.object(LDClient, 'track') as mock_track:
+        provider.track("metric-key", evaluation_context, TrackingEventDetails(attributes={'string': 'value'}))
+
+    mock_track.assert_called_once()
+    name, context, data = mock_track.call_args.args
+    assert name == "metric-key"
+    assert context.key == 'user-key'
+    assert data == {'string': 'value'}
+
+
+def test_track_sends_value_as_metric_value(provider: LaunchDarklyProvider,
+                                           evaluation_context: EvaluationContext):
+    with patch.object(LDClient, 'track') as mock_track:
+        provider.track("metric-key", evaluation_context,
+                       TrackingEventDetails(value=17, attributes={'string': 'value'}))
+
+    mock_track.assert_called_once()
+    name, context, data, metric_value = mock_track.call_args.args
+    assert name == "metric-key"
+    assert context.key == 'user-key'
+    assert data == {'string': 'value'}
+    assert metric_value == 17
+
+
+def test_track_without_attributes_sends_metric_value_without_data(provider: LaunchDarklyProvider,
+                                                                  evaluation_context: EvaluationContext):
+    with patch.object(LDClient, 'track') as mock_track:
+        provider.track("metric-key", evaluation_context, TrackingEventDetails(value=17))
+
+    mock_track.assert_called_once()
+    name, context, data, metric_value = mock_track.call_args.args
+    assert data is None
+    assert metric_value == 17
 
 
 def test_provider_emits_ready_event_when_immediately_ready():
