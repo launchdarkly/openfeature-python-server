@@ -41,7 +41,10 @@ class LaunchDarklyProvider(AbstractProvider):
         elif state == DataSourceState.OFF:
             error_message = self.__get_message(status,
                                                "the provider has encountered a permanent error or has been shutdown")
-            self.emit_provider_error(ProviderEventDetails(error_code=ErrorCode.PROVIDER_FATAL,
+            # This is not reported as a fatal error. A fatal provider prevents the OpenFeature client
+            # from evaluating flags at all, but the LaunchDarkly client can keep evaluating the flag
+            # data it already has.
+            self.emit_provider_error(ProviderEventDetails(error_code=ErrorCode.GENERAL,
                                                           message=error_message))
         elif state == DataSourceState.INTERRUPTED:
             error_message = self.__get_message(status, "encountered an unknown error")
