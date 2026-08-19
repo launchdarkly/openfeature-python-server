@@ -4,7 +4,7 @@
       "release-type": "python",
       "versioning": "default",
       "include-v-in-tag": false,
-      "extra-files": ["docs/conf.py"],
+      "extra-files": ["docs/conf.py", "ld_openfeature/version.py"],
       "include-component-in-tag": false
     }
   }
