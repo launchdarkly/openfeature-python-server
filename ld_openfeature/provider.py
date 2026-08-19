@@ -1,4 +1,3 @@
-import copy
 import threading
 from logging import getLogger
 from typing import Any, List, Mapping, Optional, Sequence, Union
@@ -28,25 +27,10 @@ logger = getLogger("launchdarkly-openfeature-server")
 
 class LaunchDarklyProvider(AbstractProvider):
     def __init__(self, config: Config):
-        self.__client = LDClient(self.__with_wrapper_info(config))
+        self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION))
 
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
-
-    @staticmethod
-    def __with_wrapper_info(config: Config) -> Config:
-        """
-        Identify the provider, rather than the SDK, as the source of requests.
-
-        The Python SDK only accepts wrapper information through the ``Config``
-        constructor, so the provided config is copied and its wrapper fields
-        are replaced.
-        """
-        wrapped = copy.copy(config)
-        wrapped._Config__wrapper_name = WRAPPER_NAME  # type: ignore[attr-defined]
-        wrapped._Config__wrapper_version = VERSION  # type: ignore[attr-defined]
-
-        return wrapped
 
     @property
     def client(self) -> LDClient:
