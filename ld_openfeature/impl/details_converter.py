@@ -1,8 +1,19 @@
-from typing import Optional
+from typing import Any, Dict, Mapping, Optional, Union
 
 from ldclient.evaluation import EvaluationDetail
 from openfeature.exception import ErrorCode
-from openfeature.flag_evaluation import FlagResolutionDetails, Reason
+from openfeature.flag_evaluation import (
+    FlagMetadata,
+    FlagResolutionDetails,
+    Reason,
+)
+
+_VARIATION_INDEX_KEY = 'variationIndex'
+_IN_EXPERIMENT_KEY = 'inExperiment'
+_RULE_INDEX_KEY = 'ruleIndex'
+_RULE_ID_KEY = 'ruleId'
+_PREREQUISITE_KEY_KEY = 'prerequisiteKey'
+_BIG_SEGMENTS_STATUS_KEY = 'bigSegmentsStatus'
 
 
 class ResolutionDetailsConverter:
@@ -30,10 +41,37 @@ class ResolutionDetailsConverter:
             error_code=openfeature_error_code,
             error_message=None,
             reason=openfeature_reason,
-            variant=openfeature_variant
-            # flag_metadata = FlagMetadata = field(default_factory=dict)
+            variant=openfeature_variant,
+            flag_metadata=self.__to_flag_metadata(reason, variation_index if not is_default else None),
         )
-        pass
+
+    @staticmethod
+    def __to_flag_metadata(reason: Mapping[str, Any], variation_index: Optional[int]) -> FlagMetadata:
+        metadata: Dict[str, Union[bool, int, float, str]] = {}
+
+        if variation_index is not None:
+            metadata[_VARIATION_INDEX_KEY] = variation_index
+
+        if reason.get('inExperiment') is True:
+            metadata[_IN_EXPERIMENT_KEY] = True
+
+        rule_index = reason.get('ruleIndex')
+        if isinstance(rule_index, int):
+            metadata[_RULE_INDEX_KEY] = rule_index
+
+        rule_id = reason.get('ruleId')
+        if isinstance(rule_id, str):
+            metadata[_RULE_ID_KEY] = rule_id
+
+        prerequisite_key = reason.get('prerequisiteKey')
+        if isinstance(prerequisite_key, str):
+            metadata[_PREREQUISITE_KEY_KEY] = prerequisite_key
+
+        big_segments_status = reason.get('bigSegmentsStatus')
+        if isinstance(big_segments_status, str):
+            metadata[_BIG_SEGMENTS_STATUS_KEY] = big_segments_status
+
+        return metadata
 
     @staticmethod
     def __kind_to_reason(kind: str) -> str:

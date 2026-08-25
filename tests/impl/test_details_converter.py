@@ -46,3 +46,45 @@ def test_ld_to_openfeature_error_kind_mappings(error_kind: Optional[str], error_
     resolution_details = details_converter.to_resolution_details(detail)
     assert resolution_details.reason == Reason.ERROR
     assert resolution_details.error_code == error_code
+
+
+def test_flag_metadata_includes_the_variation_index(details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, 1, {'kind': 'FALLTHROUGH'})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {'variationIndex': 1}
+
+
+def test_flag_metadata_omits_the_variation_index_for_default_values(details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, None, {'kind': 'ERROR', 'errorKind': 'FLAG_NOT_FOUND'})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {}
+
+
+def test_flag_metadata_includes_in_experiment_for_experiment_evaluations(details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, 1, {'kind': 'FALLTHROUGH', 'inExperiment': True})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {'variationIndex': 1, 'inExperiment': True}
+
+
+def test_flag_metadata_omits_in_experiment_for_non_experiment_evaluations(details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, 1, {'kind': 'FALLTHROUGH', 'inExperiment': False})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert 'inExperiment' not in resolution_details.flag_metadata
+
+
+def test_flag_metadata_includes_the_rule_for_rule_matches(details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, 1, {'kind': 'RULE_MATCH', 'ruleIndex': 2, 'ruleId': 'the-rule-id'})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {'variationIndex': 1, 'ruleIndex': 2, 'ruleId': 'the-rule-id'}
+
+
+def test_flag_metadata_includes_the_prerequisite_key(details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, 1, {'kind': 'PREREQUISITE_FAILED', 'prerequisiteKey': 'the-prerequisite-key'})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {'variationIndex': 1, 'prerequisiteKey': 'the-prerequisite-key'}
+
+
+def test_flag_metadata_includes_the_big_segments_status(details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, 1, {'kind': 'FALLTHROUGH', 'bigSegmentsStatus': 'STALE'})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {'variationIndex': 1, 'bigSegmentsStatus': 'STALE'}
