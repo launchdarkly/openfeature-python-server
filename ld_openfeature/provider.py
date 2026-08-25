@@ -1,4 +1,5 @@
 import threading
+from logging import getLogger
 from typing import Any, List, Mapping, Optional, Sequence, Union
 
 from ldclient.evaluation import EvaluationDetail
@@ -11,9 +12,13 @@ from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
 from openfeature.provider import AbstractProvider
 from openfeature.event import ProviderEventDetails
+from openfeature.track import TrackingEventDetails
 
 from ld_openfeature.impl.context_converter import EvaluationContextConverter
 from ld_openfeature.impl.details_converter import ResolutionDetailsConverter
+
+
+logger = getLogger("launchdarkly-openfeature-server")
 
 
 class LaunchDarklyProvider(AbstractProvider):
@@ -96,6 +101,36 @@ class LaunchDarklyProvider(AbstractProvider):
 
     def get_provider_hooks(self) -> List[Hook]:
         return []
+
+    def track(
+        self,
+        tracking_event_name: str,
+        evaluation_context: Optional[EvaluationContext] = None,
+        tracking_event_details: Optional[TrackingEventDetails] = None,
+    ) -> None:
+        if evaluation_context is None:
+            logger.info(
+                "The 'track' method was called without an evaluation context. "
+                "No 'track' event will be sent to LaunchDarkly. "
+                "The LaunchDarkly SDK requires a context to associate the event with."
+            )
+            return
+
+        ld_context = self.__context_converter.to_ld_context(evaluation_context)
+
+        if tracking_event_details is None:
+            self.__client.track(tracking_event_name, ld_context)
+            return
+
+        data = tracking_event_details.attributes or None
+        metric_value = tracking_event_details.value
+
+        if metric_value is not None:
+            self.__client.track(tracking_event_name, ld_context, data, metric_value)
+        elif data is not None:
+            self.__client.track(tracking_event_name, ld_context, data)
+        else:
+            self.__client.track(tracking_event_name, ld_context)
 
     def resolve_boolean_details(
         self,
