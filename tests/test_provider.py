@@ -11,10 +11,11 @@ from openfeature.evaluation_context import EvaluationContext
 from openfeature.event import ProviderEvent, EventDetails
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import Reason
+from openfeature.provider import ProviderStatus
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
-from tests.test_data_sources import FailingDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
+from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 
 
 @pytest.fixture
@@ -228,6 +229,28 @@ def test_provider_emits_error_event_delayed_failure():
 
     with lock:
         assert emission_count == 1
+
+    api.shutdown()
+
+
+def test_evaluations_continue_after_the_data_source_permanently_fails():
+    thread_event = threading.Event()
+
+    def handle_status(details: EventDetails):
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            thread_event.set()
+
+    api.add_handler(ProviderEvent.PROVIDER_ERROR, handle_status)
+
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=InitializedThenFailingDataSource, send_events=False))
+    api.set_provider(provider)
+    client = api.get_client()
+
+    assert thread_event.wait(timeout=5)
+
+    assert client.get_provider_status() == ProviderStatus.ERROR
+    assert client.get_boolean_value("cached-boolean", False, EvaluationContext('user-key')) is True
 
     api.shutdown()
 

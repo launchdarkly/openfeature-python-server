@@ -74,6 +74,40 @@ class DelayedFailingDataSource(UpdateProcessor):
         return False
 
 
+class InitializedThenFailingDataSource(UpdateProcessor):
+    def __init__(self, config: Config, store, ready: threading.Event):
+        self._data_source_update_sink: Optional[DataSourceUpdateSink] = config.data_source_update_sink
+        self._ready = ready
+
+    def start(self):
+        self._ready.set()
+        self._data_source_update_sink.init(
+            {FEATURES: {"cached-boolean": TestData().data_source().flag("cached-boolean").on(True)._build(1)}})
+        self._data_source_update_sink.update_status(DataSourceState.VALID, None)
+
+        def data_source_failure():
+            self._data_source_update_sink.update_status(
+                DataSourceState.OFF,
+                DataSourceErrorInfo(
+                    DataSourceErrorKind.ERROR_RESPONSE,
+                    401,
+                    time.time(),
+                    str("Bad things")
+                )
+            )
+
+        threading.Timer(0.1, data_source_failure).start()
+
+    def stop(self):
+        pass
+
+    def is_alive(self):
+        return False
+
+    def initialized(self):
+        return True
+
+
 class StaleDataSource(UpdateProcessor):
     def __init__(self, config: Config, store, ready: threading.Event):
         self._data_source_update_sink: Optional[DataSourceUpdateSink] = config.data_source_update_sink
