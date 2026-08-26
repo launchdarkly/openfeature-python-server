@@ -40,6 +40,23 @@ class FailingDataSource(UpdateProcessor):
         return False
 
 
+class NeverReadyDataSource(UpdateProcessor):
+    def __init__(self, config: Config, store, ready: threading.Event):
+        self._ready = ready
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def is_alive(self):
+        return False
+
+    def initialized(self):
+        return False
+
+
 class DelayedFailingDataSource(UpdateProcessor):
     def __init__(self, config: Config, store, ready: threading.Event):
         self._data_source_update_sink: Optional[DataSourceUpdateSink] = config.data_source_update_sink

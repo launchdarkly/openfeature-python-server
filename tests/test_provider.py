@@ -9,14 +9,14 @@ from ldclient.evaluation import EvaluationDetail
 from ldclient.integrations.test_data import TestData
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.event import ProviderEvent, EventDetails
-from openfeature.exception import ErrorCode
+from openfeature.exception import ErrorCode, ProviderFatalError
 from openfeature.flag_evaluation import Reason
 from openfeature.provider import ProviderStatus
 from openfeature.track import TrackingEventDetails
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
-from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
+from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 
 
 @pytest.fixture
@@ -47,6 +47,38 @@ def test_metadata_name_is_correct(provider: LaunchDarklyProvider):
 
 def test_ldclient_is_accessible(provider: LaunchDarklyProvider):
     assert type(provider.client) is LDClient
+
+
+def test_default_start_wait_matches_launchdarkly_sdk_default():
+    config = Config("", offline=True)
+
+    with patch("ld_openfeature.provider.LDClient") as client:
+        LaunchDarklyProvider(config)
+
+    client.assert_called_once_with(config, 5)
+
+
+def test_initialization_times_out_with_positive_start_wait():
+    result = {}
+
+    def initialize_provider():
+        provider = LaunchDarklyProvider(
+            Config("", update_processor_class=NeverReadyDataSource, send_events=False),
+            start_wait=0.1,
+        )
+        result["provider"] = provider
+        try:
+            provider.initialize(EvaluationContext("user-key"))
+        except Exception as error:
+            result["error"] = error
+
+    thread = threading.Thread(target=initialize_provider, daemon=True)
+    thread.start()
+    thread.join(timeout=1)
+
+    assert not thread.is_alive()
+    assert isinstance(result["error"], ProviderFatalError)
+    result["provider"].shutdown()
 
 
 def test_not_providing_context_returns_error(provider: LaunchDarklyProvider):

@@ -22,8 +22,16 @@ logger = getLogger("launchdarkly-openfeature-server")
 
 
 class LaunchDarklyProvider(AbstractProvider):
-    def __init__(self, config: Config):
-        self.__client = LDClient(config)
+    def __init__(self, config: Config, start_wait: float = 5):
+        """
+        Create a provider backed by a LaunchDarkly client.
+
+        :param config: The LaunchDarkly client configuration.
+        :param start_wait: The maximum time in seconds to wait for initialization; zero means no timeout.
+            The default matches the LaunchDarkly SDK default.
+        """
+        self.__client = LDClient(config, start_wait)
+        self.__start_wait = start_wait
 
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
@@ -80,7 +88,10 @@ class LaunchDarklyProvider(AbstractProvider):
         if self.__client.is_initialized():
             ready_event.set()
 
-        ready_event.wait()
+        if self.__start_wait > 0:
+            ready_event.wait(self.__start_wait)
+        else:
+            ready_event.wait()
 
         self.__client.data_source_status_provider.remove_listener(ready_handler)
 
