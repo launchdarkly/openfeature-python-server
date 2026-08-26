@@ -9,7 +9,7 @@ from ldclient.evaluation import EvaluationDetail
 from ldclient.integrations.test_data import TestData
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.event import ProviderEvent, EventDetails
-from openfeature.exception import ErrorCode
+from openfeature.exception import ErrorCode, ProviderNotReadyError
 from openfeature.flag_evaluation import Reason
 from openfeature.provider import ProviderStatus
 from openfeature.track import TrackingEventDetails
@@ -259,6 +259,17 @@ def test_provider_emits_error_event_immediately_failed():
         assert emission_count == 1
 
     api.shutdown()
+
+
+def test_provider_initialization_failure_is_not_fatal():
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=FailingDataSource, send_events=False))
+
+    with pytest.raises(ProviderNotReadyError) as error:
+        provider.initialize(EvaluationContext('user-key'))
+
+    assert error.value.error_message == "launchdarkly client initialization failed"
+    provider.shutdown()
 
 
 def test_provider_emits_error_event_delayed_failure():
