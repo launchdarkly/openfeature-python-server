@@ -49,7 +49,7 @@ api.set_provider(openfeature_provider)
 # Refer to OpenFeature documentation for getting a client and performing evaluations.
 ```
 
-The optional `start_wait` parameter controls how long initialization waits in seconds. Its default matches the LaunchDarkly SDK default, and zero means no timeout.
+The optional `start_wait` parameter is the number of seconds to wait for a successful connection to LaunchDarkly, matching the same parameter of the LaunchDarkly SDK's `LDClient`, and defaulting to the same five seconds. A positive value blocks the provider constructor for up to that long, and bounds how long OpenFeature initialization waits before reporting a failed initialization. Zero does not block the constructor at all, and initialization then waits without a deadline for the data source to become valid or to fail permanently.
 
 Refer to the [SDK reference guide](https://docs.launchdarkly.com/sdk/server-side/python) for instructions on getting started with using the SDK.
 

@@ -27,8 +27,11 @@ class LaunchDarklyProvider(AbstractProvider):
         Create a provider backed by a LaunchDarkly client.
 
         :param config: The LaunchDarkly client configuration.
-        :param start_wait: The maximum time in seconds to wait for initialization; zero means no timeout.
-            The default matches the LaunchDarkly SDK default.
+        :param start_wait: The number of seconds to wait for a successful connection to LaunchDarkly, matching
+            the same parameter of :class:`ldclient.LDClient`. A positive value blocks this constructor for up to
+            that long, and bounds how long ``initialize`` waits before reporting a failed initialization. Zero
+            does not block this constructor at all, and ``initialize`` then waits without a deadline for the
+            data source to become valid or to fail permanently.
         """
         self.__client = LDClient(config, start_wait)
         self.__start_wait = start_wait
