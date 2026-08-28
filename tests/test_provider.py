@@ -58,27 +58,18 @@ def test_default_start_wait_matches_launchdarkly_sdk_default():
     client.assert_called_once_with(config, 5)
 
 
-def test_initialization_times_out_with_positive_start_wait():
-    result = {}
+def test_initialization_fails_without_waiting_again_with_positive_start_wait():
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=NeverReadyDataSource, send_events=False),
+        start_wait=0.5,
+    )
 
-    def initialize_provider():
-        provider = LaunchDarklyProvider(
-            Config("", update_processor_class=NeverReadyDataSource, send_events=False),
-            start_wait=0.1,
-        )
-        result["provider"] = provider
-        try:
-            provider.initialize(EvaluationContext("user-key"))
-        except Exception as error:
-            result["error"] = error
+    started = time.time()
+    with pytest.raises(ProviderFatalError):
+        provider.initialize(EvaluationContext("user-key"))
 
-    thread = threading.Thread(target=initialize_provider, daemon=True)
-    thread.start()
-    thread.join(timeout=1)
-
-    assert not thread.is_alive()
-    assert isinstance(result["error"], ProviderFatalError)
-    result["provider"].shutdown()
+    assert time.time() - started < 0.25
+    provider.shutdown()
 
 
 def test_not_providing_context_returns_error(provider: LaunchDarklyProvider):

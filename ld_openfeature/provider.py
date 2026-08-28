@@ -28,10 +28,11 @@ class LaunchDarklyProvider(AbstractProvider):
 
         :param config: The LaunchDarkly client configuration.
         :param start_wait: The number of seconds to wait for a successful connection to LaunchDarkly, matching
-            the same parameter of :class:`ldclient.LDClient`. A positive value blocks this constructor for up to
-            that long, and bounds how long ``initialize`` waits before reporting a failed initialization. Zero
-            does not block this constructor at all, and ``initialize`` then waits without a deadline for the
-            data source to become valid or to fail permanently.
+            the same parameter of :class:`ldclient.LDClient`. A positive value bounds the whole of initialization:
+            this constructor blocks for up to that long, and ``initialize`` then completes immediately, reporting
+            a failed initialization if the client did not become ready in time. Zero does not block this
+            constructor at all, and ``initialize`` then waits without a deadline for the data source to become
+            valid or to fail permanently.
         """
         self.__client = LDClient(config, start_wait)
         self.__start_wait = start_wait
@@ -91,9 +92,8 @@ class LaunchDarklyProvider(AbstractProvider):
         if self.__client.is_initialized():
             ready_event.set()
 
-        if self.__start_wait > 0:
-            ready_event.wait(self.__start_wait)
-        else:
+        # With a start wait the client constructor has already waited, so the outcome is whatever it is now.
+        if self.__start_wait <= 0:
             ready_event.wait()
 
         self.__client.data_source_status_provider.remove_listener(ready_handler)
