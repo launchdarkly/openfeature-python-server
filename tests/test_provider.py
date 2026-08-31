@@ -16,8 +16,8 @@ from openfeature.track import TrackingEventDetails
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
+from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 from ld_openfeature.version import VERSION
-from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 
 
 @pytest.fixture
@@ -48,6 +48,29 @@ def test_metadata_name_is_correct(provider: LaunchDarklyProvider):
 
 def test_ldclient_is_accessible(provider: LaunchDarklyProvider):
     assert type(provider.client) is LDClient
+
+
+def test_default_start_wait_matches_launchdarkly_sdk_default():
+    config = Config("", offline=True)
+
+    with patch("ld_openfeature.provider.LDClient") as client:
+        LaunchDarklyProvider(config)
+
+    assert client.call_args.args[1] == 5
+
+
+def test_initialization_fails_without_waiting_again_with_positive_start_wait():
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=NeverReadyDataSource, send_events=False),
+        start_wait=0.5,
+    )
+
+    started = time.time()
+    with pytest.raises(ProviderNotReadyError):
+        provider.initialize(EvaluationContext("user-key"))
+
+    assert time.time() - started < 0.25
+    provider.shutdown()
 
 
 def test_provider_identifies_itself_as_the_wrapper(provider: LaunchDarklyProvider, config: Config):

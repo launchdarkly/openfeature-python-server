@@ -26,8 +26,20 @@ logger = getLogger("launchdarkly-openfeature-server")
 
 
 class LaunchDarklyProvider(AbstractProvider):
-    def __init__(self, config: Config):
-        self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION))
+    def __init__(self, config: Config, start_wait: float = 5):
+        """
+        Create a provider backed by a LaunchDarkly client.
+
+        :param config: The LaunchDarkly client configuration.
+        :param start_wait: The number of seconds to wait for a successful connection to LaunchDarkly, matching
+            the same parameter of :class:`ldclient.LDClient`. A positive value bounds the whole of initialization:
+            this constructor blocks for up to that long, and ``initialize`` then completes immediately, reporting
+            a failed initialization if the client did not become ready in time. Zero does not block this
+            constructor at all, and ``initialize`` then waits without a deadline for the data source to become
+            valid or to fail permanently.
+        """
+        self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION), start_wait)
+        self.__start_wait = start_wait
 
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
@@ -84,7 +96,9 @@ class LaunchDarklyProvider(AbstractProvider):
         if self.__client.is_initialized():
             ready_event.set()
 
-        ready_event.wait()
+        # With a start wait the client constructor has already waited, so the outcome is whatever it is now.
+        if self.__start_wait <= 0:
+            ready_event.wait()
 
         self.__client.data_source_status_provider.remove_listener(ready_handler)
 
