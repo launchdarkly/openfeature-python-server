@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.7.0...0.8.0) (2026-08-31)
+
+
+### Features
+
+* Add a start wait timeout for initialization ([#59](https://github.com/launchdarkly/openfeature-python-server/issues/59)) ([c8708fd](https://github.com/launchdarkly/openfeature-python-server/commit/c8708fd8f85bf97f3213d7360ba2565877beeda9))
+
 ## [0.7.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.6.0...0.7.0) (2026-08-31)
 
 
