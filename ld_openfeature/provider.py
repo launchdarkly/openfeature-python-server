@@ -16,6 +16,10 @@ from openfeature.track import TrackingEventDetails
 
 from ld_openfeature.impl.context_converter import EvaluationContextConverter
 from ld_openfeature.impl.details_converter import ResolutionDetailsConverter
+from ld_openfeature.version import VERSION
+
+
+WRAPPER_NAME = "open-feature-python-server"
 
 
 logger = getLogger("launchdarkly-openfeature-server")
@@ -23,7 +27,7 @@ logger = getLogger("launchdarkly-openfeature-server")
 
 class LaunchDarklyProvider(AbstractProvider):
     def __init__(self, config: Config):
-        self.__client = LDClient(config)
+        self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION))
 
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()

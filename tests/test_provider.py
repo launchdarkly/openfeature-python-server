@@ -16,6 +16,7 @@ from openfeature.track import TrackingEventDetails
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
+from ld_openfeature.version import VERSION
 from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 
 
@@ -47,6 +48,12 @@ def test_metadata_name_is_correct(provider: LaunchDarklyProvider):
 
 def test_ldclient_is_accessible(provider: LaunchDarklyProvider):
     assert type(provider.client) is LDClient
+
+
+def test_provider_identifies_itself_as_the_wrapper(provider: LaunchDarklyProvider, config: Config):
+    assert provider.client._config.wrapper_name == "open-feature-python-server"
+    assert provider.client._config.wrapper_version == VERSION
+    assert config.wrapper_name is None
 
 
 def test_not_providing_context_returns_error(provider: LaunchDarklyProvider):
