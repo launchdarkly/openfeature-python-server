@@ -38,6 +38,7 @@ def test_ld_to_openfeature_kind_mappings(detail_kind: str, reason: Union[str, Re
         pytest.param('FLAG_NOT_FOUND', ErrorCode.FLAG_NOT_FOUND),
         pytest.param('MALFORMED_FLAG', ErrorCode.PARSE_ERROR),
         pytest.param('USER_NOT_SPECIFIED', ErrorCode.TARGETING_KEY_MISSING),
+        pytest.param('WRONG_TYPE', ErrorCode.TYPE_MISMATCH),
         pytest.param('EXCEPTION_ERROR', ErrorCode.GENERAL),
     ],
 )

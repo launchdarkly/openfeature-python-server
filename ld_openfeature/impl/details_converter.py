@@ -100,6 +100,8 @@ class ResolutionDetailsConverter:
             return ErrorCode.PARSE_ERROR
         elif error_kind == 'USER_NOT_SPECIFIED':
             return ErrorCode.TARGETING_KEY_MISSING
+        elif error_kind == 'WRONG_TYPE':
+            return ErrorCode.TYPE_MISMATCH
 
         # NOTE: EXCEPTION_ERROR intentionally omitted
 
