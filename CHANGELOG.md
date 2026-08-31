@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.7.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.6.0...0.7.0) (2026-08-31)
+
+
+### Features
+
+* Populate OpenFeature flag metadata from the evaluation reason ([#53](https://github.com/launchdarkly/openfeature-python-server/issues/53)) ([11ae1a6](https://github.com/launchdarkly/openfeature-python-server/commit/11ae1a6b3491bb2d8eeeecb7b005906b86e97d40))
+* Report provider name and version to LaunchDarkly ([#51](https://github.com/launchdarkly/openfeature-python-server/issues/51)) ([4290b8a](https://github.com/launchdarkly/openfeature-python-server/commit/4290b8a06c402e2ca9647ff7e39091e0132e5dc7))
+* Support OpenFeature tracking ([#50](https://github.com/launchdarkly/openfeature-python-server/issues/50)) ([9395775](https://github.com/launchdarkly/openfeature-python-server/commit/93957750478503c4a49d3277b00e3188a45097a0))
+
+
+### Bug Fixes
+
+* Do not report a failed initialization as a fatal error ([#56](https://github.com/launchdarkly/openfeature-python-server/issues/56)) ([946a515](https://github.com/launchdarkly/openfeature-python-server/commit/946a515573521ddc5144d5cefac58a982aac4327))
+* Do not report a permanent data source failure as fatal ([#52](https://github.com/launchdarkly/openfeature-python-server/issues/52)) ([15014c1](https://github.com/launchdarkly/openfeature-python-server/commit/15014c1094a8b06cb7c66cd9dfd3468fb2f636fc))
+* Map the WRONG_TYPE error kind to TYPE_MISMATCH ([#57](https://github.com/launchdarkly/openfeature-python-server/issues/57)) ([17478dc](https://github.com/launchdarkly/openfeature-python-server/commit/17478dcd5b3567a96d66948c2b9fd3f6f88e73e5))
+
+
+### Documentation
+
+* Add an OpenFeature feature matrix to the README ([#58](https://github.com/launchdarkly/openfeature-python-server/issues/58)) ([6c31554](https://github.com/launchdarkly/openfeature-python-server/commit/6c31554a9fb2471560170525dcdc5e8225a6edb2))
+
 ## [0.6.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.5.1...0.6.0) (2026-03-24)
 
 
