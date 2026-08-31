@@ -9,7 +9,7 @@ from ldclient.evaluation import EvaluationDetail
 from ldclient.integrations.test_data import TestData
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.event import ProviderEvent, EventDetails
-from openfeature.exception import ErrorCode, ProviderFatalError
+from openfeature.exception import ErrorCode, ProviderNotReadyError
 from openfeature.flag_evaluation import Reason
 from openfeature.provider import ProviderStatus
 from openfeature.track import TrackingEventDetails
@@ -17,6 +17,7 @@ from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
 from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
+from ld_openfeature.version import VERSION
 
 
 @pytest.fixture
@@ -55,7 +56,7 @@ def test_default_start_wait_matches_launchdarkly_sdk_default():
     with patch("ld_openfeature.provider.LDClient") as client:
         LaunchDarklyProvider(config)
 
-    client.assert_called_once_with(config, 5)
+    assert client.call_args.args[1] == 5
 
 
 def test_initialization_fails_without_waiting_again_with_positive_start_wait():
@@ -65,11 +66,17 @@ def test_initialization_fails_without_waiting_again_with_positive_start_wait():
     )
 
     started = time.time()
-    with pytest.raises(ProviderFatalError):
+    with pytest.raises(ProviderNotReadyError):
         provider.initialize(EvaluationContext("user-key"))
 
     assert time.time() - started < 0.25
     provider.shutdown()
+
+
+def test_provider_identifies_itself_as_the_wrapper(provider: LaunchDarklyProvider, config: Config):
+    assert provider.client._config.wrapper_name == "open-feature-python-server"
+    assert provider.client._config.wrapper_version == VERSION
+    assert config.wrapper_name is None
 
 
 def test_not_providing_context_returns_error(provider: LaunchDarklyProvider):
@@ -282,6 +289,17 @@ def test_provider_emits_error_event_immediately_failed():
         assert emission_count == 1
 
     api.shutdown()
+
+
+def test_provider_initialization_failure_is_not_fatal():
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=FailingDataSource, send_events=False))
+
+    with pytest.raises(ProviderNotReadyError) as error:
+        provider.initialize(EvaluationContext('user-key'))
+
+    assert error.value.error_message == "launchdarkly client initialization failed"
+    provider.shutdown()
 
 
 def test_provider_emits_error_event_delayed_failure():

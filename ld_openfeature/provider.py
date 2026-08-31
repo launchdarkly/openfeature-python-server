@@ -6,7 +6,7 @@ from ldclient.evaluation import EvaluationDetail
 from ldclient import LDClient, Config
 from ldclient.interfaces import DataSourceStatus, FlagChange, DataSourceState
 from openfeature.evaluation_context import EvaluationContext
-from openfeature.exception import ErrorCode, ProviderFatalError
+from openfeature.exception import ErrorCode, ProviderNotReadyError
 from openfeature.flag_evaluation import FlagResolutionDetails, FlagType, FlagValueType, Reason
 from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
@@ -16,6 +16,10 @@ from openfeature.track import TrackingEventDetails
 
 from ld_openfeature.impl.context_converter import EvaluationContextConverter
 from ld_openfeature.impl.details_converter import ResolutionDetailsConverter
+from ld_openfeature.version import VERSION
+
+
+WRAPPER_NAME = "open-feature-python-server"
 
 
 logger = getLogger("launchdarkly-openfeature-server")
@@ -34,7 +38,7 @@ class LaunchDarklyProvider(AbstractProvider):
             constructor at all, and ``initialize`` then waits without a deadline for the data source to become
             valid or to fail permanently.
         """
-        self.__client = LDClient(config, start_wait)
+        self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION), start_wait)
         self.__start_wait = start_wait
 
         self.__context_converter = EvaluationContextConverter()
@@ -99,7 +103,7 @@ class LaunchDarklyProvider(AbstractProvider):
         self.__client.data_source_status_provider.remove_listener(ready_handler)
 
         if not self.__client.is_initialized():
-            raise ProviderFatalError(error_message="launchdarkly client initialization failed")
+            raise ProviderNotReadyError(error_message="launchdarkly client initialization failed")
 
         # Listen to new status events and emit them.
         self.__client.data_source_status_provider.add_listener(self.__handle_data_source_status)
