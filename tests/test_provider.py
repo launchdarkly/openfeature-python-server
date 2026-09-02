@@ -16,7 +16,7 @@ from openfeature.track import TrackingEventDetails
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
-from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
+from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, RepeatedlyInterruptedDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
 from ld_openfeature.version import VERSION
 
 
@@ -365,6 +365,33 @@ def test_provider_emits_stale_event():
     api.set_provider(openfeature_provider)
 
     assert thread_event.wait(timeout=5)
+
+    api.shutdown()
+
+
+def test_provider_emits_one_event_for_a_repeated_status():
+    thread_event = threading.Event()
+    lock = threading.Lock()
+    emission_count = 0
+
+    def handle_status(details: EventDetails):
+        nonlocal emission_count
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            with lock:
+                emission_count += 1
+            thread_event.set()
+
+    api.add_handler(ProviderEvent.PROVIDER_STALE, handle_status)
+
+    openfeature_provider = LaunchDarklyProvider(
+        Config("", update_processor_class=RepeatedlyInterruptedDataSource, send_events=False))
+    api.set_provider(openfeature_provider)
+
+    assert thread_event.wait(timeout=5)
+    time.sleep(0.5)
+
+    with lock:
+        assert emission_count == 1
 
     api.shutdown()
 
