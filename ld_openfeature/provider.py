@@ -44,6 +44,9 @@ class LaunchDarklyProvider(AbstractProvider):
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
 
+        self.__status_lock = threading.Lock()
+        self.__last_emitted_state: Optional[DataSourceState] = None
+
     @property
     def client(self) -> LDClient:
         """
@@ -53,11 +56,27 @@ class LaunchDarklyProvider(AbstractProvider):
         """
         return self.__client
 
+    def __is_new_status(self, state: DataSourceState) -> bool:
+        """
+        Report whether a state changes the provider status. Several data source states can map to the same provider
+        status, and a repeated status is not a change an application can act on.
+        """
+        with self.__status_lock:
+            if state == self.__last_emitted_state:
+                return False
+
+            self.__last_emitted_state = state
+            return True
+
     def __handle_data_source_status(self, status: DataSourceStatus):
         state = status.state
         if state == DataSourceState.INITIALIZING:
             return
-        elif state == DataSourceState.VALID:
+
+        if not self.__is_new_status(state):
+            return
+
+        if state == DataSourceState.VALID:
             self.emit_provider_ready(ProviderEventDetails())
         elif state == DataSourceState.OFF:
             error_message = self.__get_message(status,

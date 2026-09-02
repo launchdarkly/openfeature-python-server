@@ -157,6 +157,39 @@ class StaleDataSource(UpdateProcessor):
         return True
 
 
+class RepeatedlyInterruptedDataSource(UpdateProcessor):
+    def __init__(self, config: Config, store, ready: threading.Event):
+        self._data_source_update_sink: Optional[DataSourceUpdateSink] = config.data_source_update_sink
+        self._ready = ready
+
+    def start(self):
+        self._ready.set()
+        self._data_source_update_sink.update_status(DataSourceState.VALID, None)
+
+        def data_source_interrupted(status_code: int):
+            self._data_source_update_sink.update_status(
+                DataSourceState.INTERRUPTED,
+                DataSourceErrorInfo(
+                    DataSourceErrorKind.ERROR_RESPONSE,
+                    status_code,
+                    time.time(),
+                    str("Less bad things")
+                )
+            )
+
+        threading.Timer(0.1, data_source_interrupted, [408]).start()
+        threading.Timer(0.2, data_source_interrupted, [503]).start()
+
+    def stop(self):
+        pass
+
+    def is_alive(self):
+        return False
+
+    def initialized(self):
+        return True
+
+
 class UpdatingDataSource(UpdateProcessor):
     def __init__(self, config: Config, store, ready: threading.Event):
         self._data_source_update_sink: Optional[DataSourceUpdateSink] = config.data_source_update_sink
