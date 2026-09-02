@@ -163,11 +163,15 @@ class RepeatedlyInterruptedDataSource(UpdateProcessor):
         self._ready = ready
 
     def start(self):
+        sink = self._data_source_update_sink
+        if sink is None:
+            return
+
         self._ready.set()
-        self._data_source_update_sink.update_status(DataSourceState.VALID, None)
+        sink.update_status(DataSourceState.VALID, None)
 
         def data_source_interrupted(status_code: int):
-            self._data_source_update_sink.update_status(
+            sink.update_status(
                 DataSourceState.INTERRUPTED,
                 DataSourceErrorInfo(
                     DataSourceErrorKind.ERROR_RESPONSE,
