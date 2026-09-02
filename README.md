@@ -95,6 +95,8 @@ There are several other attributes which have special functionality within a sin
 - A key of `anonymous`. Must be a boolean value.  [Equivalent to the 'anonymous' builder method in the SDK.](https://launchdarkly-python-sdk.readthedocs.io/en/latest/api-main.html#ldclient.ContextBuilder.anonymous)
 - A key of `name`. Must be a string. [Equivalent to the 'name' builder method in the SDK.](https://launchdarkly-python-sdk.readthedocs.io/en/latest/api-main.html#ldclient.ContextBuilder.name)
 
+The LaunchDarkly context model has no date type, so a `datetime` attribute is converted to a string containing its ISO-8601 representation in UTC, which is the format the LaunchDarkly date targeting operators accept. A `datetime` without a timezone is treated as UTC. This conversion is applied to `datetime` values nested in lists and dictionaries as well.
+
 ### Examples
 
 #### A single user context

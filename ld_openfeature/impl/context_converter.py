@@ -1,11 +1,39 @@
+from datetime import datetime, timezone
 from logging import getLogger
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from ldclient.context import Context, ContextBuilder, ContextMultiBuilder
 from openfeature.evaluation_context import EvaluationContext, EvaluationContextAttribute
 
 
 logger = getLogger("launchdarkly-openfeature-server")
+
+
+def _to_ld_value(value: Any) -> Any:
+    """
+    Convert an OpenFeature attribute value into a value the LaunchDarkly SDK can represent.
+
+    A datetime becomes its ISO-8601 representation in UTC, because the LaunchDarkly value model has
+    no date type. A datetime without a timezone is treated as UTC. A value which cannot be
+    converted becomes None.
+    """
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+
+        return value.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+
+    if isinstance(value, Mapping):
+        return {str(k): _to_ld_value(v) for k, v in value.items()}
+
+    if isinstance(value, Sequence):
+        return [_to_ld_value(item) for item in value]
+
+    logger.error("The attribute value of type %s could not be converted; using None instead", type(value).__name__)
+    return None
 
 
 class EvaluationContextConverter:
@@ -108,6 +136,6 @@ class EvaluationContextConverter:
             elif k == 'privateAttributes':
                 logger.error("The attribute 'privateAttributes' must be an array")
             else:
-                builder.set(k, v)
+                builder.set(k, _to_ld_value(v))
 
         return builder.build()
