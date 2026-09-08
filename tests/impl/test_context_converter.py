@@ -1,4 +1,7 @@
+import json
+from datetime import datetime, timedelta, timezone
 from typing import Mapping
+
 import pytest
 from openfeature.evaluation_context import EvaluationContext, EvaluationContextAttribute
 
@@ -219,3 +222,31 @@ def test_handles_invalid_nested_contexts(context_converter: EvaluationContextCon
 
     assert ld_context.valid is False
     assert ld_context.multiple is False
+
+def test_converts_datetime_attributes_to_iso_8601(context_converter: EvaluationContextConverter):
+    attributes: Mapping[str, EvaluationContextAttribute] = {
+        'signupDate': datetime(2024, 3, 1, 12, 30, 45, tzinfo=timezone.utc),
+        'offsetDate': datetime(2024, 3, 1, 7, 30, 45, tzinfo=timezone(timedelta(hours=-5))),
+        'naiveDate': datetime(2024, 3, 1, 12, 30, 45),
+        'nested': {'dates': [datetime(2024, 3, 1, 12, 30, 45, tzinfo=timezone.utc)]},
+    }
+    context = EvaluationContext('user-key', attributes)
+    ld_context = context_converter.to_ld_context(context)
+
+    assert ld_context.valid is True
+    assert ld_context.get('signupDate') == '2024-03-01T12:30:45Z'
+    assert ld_context.get('offsetDate') == '2024-03-01T12:30:45Z'
+    assert ld_context.get('naiveDate') == '2024-03-01T12:30:45Z'
+    assert ld_context.get('nested') == {'dates': ['2024-03-01T12:30:45Z']}
+
+    assert json.dumps(ld_context.to_dict())
+
+
+def test_uses_none_for_a_value_which_cannot_be_converted(context_converter: EvaluationContextConverter, caplog):
+    context = EvaluationContext('user-key', {'unsupported': object()})  # type: ignore[dict-item]
+    ld_context = context_converter.to_ld_context(context)
+
+    assert ld_context.valid is True
+    assert ld_context.get('unsupported') is None
+
+    assert caplog.records[0].message == 'The attribute value of type object could not be converted; using None instead'
