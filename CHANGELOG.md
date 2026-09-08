@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.0...0.8.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* Convert datetime attributes to ISO-8601 strings ([#61](https://github.com/launchdarkly/openfeature-python-server/issues/61)) ([fa6eec1](https://github.com/launchdarkly/openfeature-python-server/commit/fa6eec18cb3d4c6b3f876227695b028f6263d9df))
+
 ## [0.8.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.7.0...0.8.0) (2026-08-31)
 
 
