@@ -16,7 +16,7 @@ from openfeature.track import TrackingEventDetails
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
-from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
+from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource, DelayedReadyDataSource
 from ld_openfeature.version import VERSION
 
 
@@ -70,6 +70,35 @@ def test_initialization_fails_without_waiting_again_with_positive_start_wait():
         provider.initialize(EvaluationContext("user-key"))
 
     assert time.time() - started < 0.25
+    provider.shutdown()
+
+
+def test_zero_start_wait_does_not_wait_for_the_data_source():
+    started = time.time()
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=NeverReadyDataSource, send_events=False),
+        start_wait=0,
+    )
+
+    with pytest.raises(ProviderNotReadyError):
+        provider.initialize(EvaluationContext("user-key"))
+
+    assert time.time() - started < 0.25
+    provider.shutdown()
+
+
+def test_no_start_wait_waits_for_the_data_source_during_initialization():
+    started = time.time()
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=DelayedReadyDataSource, send_events=False),
+        start_wait=None,
+    )
+    construction_finished = time.time()
+
+    provider.initialize(EvaluationContext("user-key"))
+
+    assert construction_finished - started < 0.1
+    assert time.time() - started >= 0.1
     provider.shutdown()
 
 

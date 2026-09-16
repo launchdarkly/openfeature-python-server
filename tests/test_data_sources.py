@@ -91,6 +91,34 @@ class DelayedFailingDataSource(UpdateProcessor):
         return False
 
 
+class DelayedReadyDataSource(UpdateProcessor):
+    def __init__(self, config: Config, store, ready: threading.Event):
+        self._data_source_update_sink: Optional[DataSourceUpdateSink] = config.data_source_update_sink
+        self._ready = ready
+        self._initialized = False
+
+    def start(self):
+        if self._data_source_update_sink is None:
+            return
+
+        def data_source_ready():
+            self._data_source_update_sink.init({FEATURES: {}})
+            self._initialized = True
+            self._data_source_update_sink.update_status(DataSourceState.VALID, None)
+            self._ready.set()
+
+        threading.Timer(0.1, data_source_ready).start()
+
+    def stop(self):
+        pass
+
+    def is_alive(self):
+        return True
+
+    def initialized(self):
+        return self._initialized
+
+
 class InitializedThenFailingDataSource(UpdateProcessor):
     def __init__(self, config: Config, store, ready: threading.Event):
         self._data_source_update_sink: Optional[DataSourceUpdateSink] = config.data_source_update_sink
