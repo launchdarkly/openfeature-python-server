@@ -102,6 +102,30 @@ def test_no_start_wait_waits_for_the_data_source_during_initialization():
     provider.shutdown()
 
 
+def test_ready_is_reported_after_initialization_failed():
+    thread_event = threading.Event()
+
+    def handle_status(details: EventDetails):
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            thread_event.set()
+
+    api.add_handler(ProviderEvent.PROVIDER_READY, handle_status)
+
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=DelayedReadyDataSource, send_events=False),
+        start_wait=0,
+    )
+
+    with pytest.raises(ProviderNotReadyError):
+        provider.initialize(EvaluationContext("user-key"))
+
+    api.set_provider(provider)
+
+    assert thread_event.wait(timeout=5)
+
+    api.shutdown()
+
+
 def test_provider_identifies_itself_as_the_wrapper(provider: LaunchDarklyProvider, config: Config):
     assert provider.client._config.wrapper_name == "open-feature-python-server"
     assert provider.client._config.wrapper_version == VERSION
