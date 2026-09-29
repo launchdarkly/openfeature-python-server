@@ -127,13 +127,14 @@ class LaunchDarklyProvider(AbstractProvider):
 
         self.__client.data_source_status_provider.remove_listener(ready_handler)
 
-        initialized = self.__client.is_initialized()
-
         # The OpenFeature client reports the outcome of initialization itself, so the provider records the
-        # resulting status without emitting an event for it.
+        # resulting status without emitting an event for it. The outcome is read and recorded, and initialization
+        # is completed, under the lock, so a concurrent status change either precedes the outcome it is included
+        # in or is emitted.
         with self.__status_lock:
+            initialized = self.__client.is_initialized()
             self.__provider_status = ProviderStatus.READY if initialized else ProviderStatus.ERROR
-        self.__initialization_complete.set()
+            self.__initialization_complete.set()
 
         if not initialized:
             raise ProviderNotReadyError(error_message="launchdarkly client initialization failed")

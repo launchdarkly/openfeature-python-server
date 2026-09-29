@@ -104,9 +104,12 @@ def test_no_start_wait_waits_for_the_data_source_during_initialization():
 
 def test_ready_is_reported_after_initialization_failed():
     thread_event = threading.Event()
+    emission_count = 0
 
     def handle_status(details: EventDetails):
+        nonlocal emission_count
         if details.provider_name == 'launchdarkly-openfeature-server':
+            emission_count += 1
             thread_event.set()
 
     api.add_handler(ProviderEvent.PROVIDER_READY, handle_status)
@@ -116,12 +119,13 @@ def test_ready_is_reported_after_initialization_failed():
         start_wait=0,
     )
 
-    with pytest.raises(ProviderNotReadyError):
-        provider.initialize(EvaluationContext("user-key"))
-
+    # Initialization fails because the data source is not ready yet, and the provider reports the later
+    # transition to a valid data source.
     api.set_provider(provider)
 
     assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+    assert emission_count == 1
 
     api.shutdown()
 
