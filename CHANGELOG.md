@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.3](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.2...0.8.3) (2026-10-05)
+
+
+### Documentation
+
+* Explain non-blocking provider registration ([#65](https://github.com/launchdarkly/openfeature-python-server/issues/65)) ([447525f](https://github.com/launchdarkly/openfeature-python-server/commit/447525fa340c94eb10592937d8fc424d6f092333))
+
 ## [0.8.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.1...0.8.2) (2026-10-02)
 
 
