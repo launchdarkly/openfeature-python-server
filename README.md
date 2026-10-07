@@ -37,7 +37,7 @@ This matrix mirrors the [feature matrix of the OpenFeature SDK for Python](https
 | ✅      | Hooks                           | Hooks are registered on the OpenFeature API and client; the provider requires no additional support and its results are visible to hooks, including [flag metadata](#flag-metadata).                                       |
 | ✅      | Logging                         | The provider logs through the logging configuration of the `Config` it is given.                                                                                                                                           |
 | ✅      | Domains                         | Domains bind clients to providers in the OpenFeature SDK; a separate provider instance may be registered per domain.                                                                                                       |
-| ✅      | Eventing                        | LaunchDarkly data source status changes are emitted as `PROVIDER_READY`, `PROVIDER_STALE` and `PROVIDER_ERROR`; flag changes as `PROVIDER_CONFIGURATION_CHANGED` with the changed flag key.                              |
+| ✅      | Eventing                        | LaunchDarkly data source status changes are emitted as `PROVIDER_READY`, `PROVIDER_STALE` and `PROVIDER_ERROR`, and only when the status changes; flag changes as `PROVIDER_CONFIGURATION_CHANGED` with the changed flag key.                              |
 | ✅      | Tracking                        | `track` sends a LaunchDarkly custom event for the evaluation context, with the tracking event value and remaining details attached.                                                                                        |
 | ✅      | Initialization                  | `initialize` reports whether the LaunchDarkly client became ready. The optional `start_wait` parameter bounds initialization; `None` waits until the data source becomes valid or permanently fails.                        |
 | ✅      | Shutdown                        | `shutdown` closes the LaunchDarkly client; a closed client cannot be restarted, so a new provider instance is required afterward.                                                                                          |
@@ -71,6 +71,8 @@ api.set_provider(openfeature_provider)
 ```
 
 The optional `start_wait` parameter is the number of seconds to wait for a successful connection to LaunchDarkly, matching the same parameter of the LaunchDarkly SDK's `LDClient`, and defaulting to the same five seconds. A positive value bounds the whole of initialization: the provider constructor blocks for up to that long, and OpenFeature initialization then completes immediately, reporting a failed initialization if the client did not become ready in time. Zero waits nowhere, so initialization fails unless the client is already ready, and the application learns when the client becomes usable from provider events. `None` requests waiting indefinitely: the constructor does not block, and initialization waits without a deadline for the data source to become valid or to fail permanently.
+
+`api.set_provider` registers the provider without waiting for it to initialize, so the first evaluations may use fallback values while the LaunchDarkly client is still connecting. Use `api.set_provider_and_wait` instead when the application needs registration to block until initialization has succeeded or failed.
 
 Refer to the [SDK reference guide](https://docs.launchdarkly.com/sdk/server-side/python) for instructions on getting started with using the SDK.
 

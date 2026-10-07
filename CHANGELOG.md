@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.1...0.8.2) (2026-10-02)
+
+
+### Bug Fixes
+
+* Do not emit duplicate provider status events ([#62](https://github.com/launchdarkly/openfeature-python-server/issues/62)) ([cd06fc5](https://github.com/launchdarkly/openfeature-python-server/commit/cd06fc5a8e357d97d42c69e3a7a48431688a1afc))
+
 ## [0.8.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.0...0.8.1) (2026-09-08)
 
 
