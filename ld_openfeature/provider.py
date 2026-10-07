@@ -10,7 +10,7 @@ from openfeature.exception import ErrorCode, ProviderNotReadyError
 from openfeature.flag_evaluation import FlagResolutionDetails, FlagType, FlagValueType, Reason
 from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
-from openfeature.provider import AbstractProvider
+from openfeature.provider import AbstractProvider, ProviderStatus
 from openfeature.event import ProviderEventDetails
 from openfeature.track import TrackingEventDetails
 
@@ -26,7 +26,7 @@ logger = getLogger("launchdarkly-openfeature-server")
 
 
 class LaunchDarklyProvider(AbstractProvider):
-    def __init__(self, config: Config, start_wait: float = 5):
+    def __init__(self, config: Config, start_wait: Optional[float] = 5):
         """
         Create a provider backed by a LaunchDarkly client.
 
@@ -34,18 +34,20 @@ class LaunchDarklyProvider(AbstractProvider):
         :param start_wait: The number of seconds to wait for a successful connection to LaunchDarkly, matching
             the same parameter of :class:`ldclient.LDClient`. A positive value bounds the whole of initialization:
             this constructor blocks for up to that long, and ``initialize`` then completes immediately, reporting
-            a failed initialization if the client did not become ready in time. Zero does not block this
-            constructor at all, and ``initialize`` then waits without a deadline for the data source to become
-            valid or to fail permanently.
+            a failed initialization if the client did not become ready in time. Zero waits nowhere, so
+            ``initialize`` reports a failed initialization unless the client is already ready. ``None`` waits
+            only in ``initialize``, without a deadline, until the data source becomes valid or fails permanently.
         """
-        self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION), start_wait)
+        self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION),
+                                 0 if start_wait is None else start_wait)
         self.__start_wait = start_wait
+        self.__initialization_complete = threading.Event()
+        self.__status_lock = threading.Lock()
+        self.__provider_status = ProviderStatus.NOT_READY
 
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
 
-        self.__status_lock = threading.Lock()
-        self.__last_emitted_state: Optional[DataSourceState] = None
 
     @property
     def client(self) -> LDClient:
@@ -56,39 +58,40 @@ class LaunchDarklyProvider(AbstractProvider):
         """
         return self.__client
 
-    def __is_new_status(self, state: DataSourceState) -> bool:
+    def __set_status(self, status: ProviderStatus) -> bool:
         """
-        Report whether a state changes the provider status. Several data source states can map to the same provider
-        status, and a repeated status is not a change an application can act on.
+        Record the provider status and report whether it changed, and whether the change should be emitted.
+
+        The OpenFeature client emits an event for the status change which completes initialization, so that
+        change is not emitted here. Changes after initialization has completed, including after it has failed,
+        are emitted.
         """
         with self.__status_lock:
-            if state == self.__last_emitted_state:
+            if status == self.__provider_status:
                 return False
-
-            self.__last_emitted_state = state
-            return True
+            self.__provider_status = status
+            return self.__initialization_complete.is_set()
 
     def __handle_data_source_status(self, status: DataSourceStatus):
         state = status.state
         if state == DataSourceState.INITIALIZING:
             return
-
-        if not self.__is_new_status(state):
-            return
-
-        if state == DataSourceState.VALID:
-            self.emit_provider_ready(ProviderEventDetails())
+        elif state == DataSourceState.VALID:
+            if self.__set_status(ProviderStatus.READY):
+                self.emit_provider_ready(ProviderEventDetails())
         elif state == DataSourceState.OFF:
             error_message = self.__get_message(status,
                                                "the provider has encountered a permanent error or has been shutdown")
             # This is not reported as a fatal error. A fatal provider prevents the OpenFeature client
             # from evaluating flags at all, but the LaunchDarkly client can keep evaluating the flag
             # data it already has.
-            self.emit_provider_error(ProviderEventDetails(error_code=ErrorCode.GENERAL,
-                                                          message=error_message))
+            if self.__set_status(ProviderStatus.ERROR):
+                self.emit_provider_error(ProviderEventDetails(error_code=ErrorCode.GENERAL,
+                                                              message=error_message))
         elif state == DataSourceState.INTERRUPTED:
             error_message = self.__get_message(status, "encountered an unknown error")
-            self.emit_provider_stale(ProviderEventDetails(message=error_message))
+            if self.__set_status(ProviderStatus.STALE):
+                self.emit_provider_stale(ProviderEventDetails(message=error_message))
 
         # For now treat an unknown state as no change.
 
@@ -105,7 +108,11 @@ class LaunchDarklyProvider(AbstractProvider):
             elif status.state == DataSourceState.OFF:
                 ready_event.set()
 
-        # We listen just to handle the ready event. We do not emit events because the client emits them for us.
+        # We listen for status changes before checking the current state, so that a change in between is not
+        # missed. Emission is suppressed until initialization has completed, so the listeners stay registered
+        # even when initialization fails and the client later recovers.
+        self.__client.data_source_status_provider.add_listener(self.__handle_data_source_status)
+        self.__client.flag_tracker.add_listener(self.__handle_flag_change)
         self.__client.data_source_status_provider.add_listener(ready_handler)
 
         # Check for conditions that may have happened before we added the listener.
@@ -116,17 +123,22 @@ class LaunchDarklyProvider(AbstractProvider):
             ready_event.set()
 
         # With a start wait the client constructor has already waited, so the outcome is whatever it is now.
-        if self.__start_wait <= 0:
+        if self.__start_wait is None:
             ready_event.wait()
 
         self.__client.data_source_status_provider.remove_listener(ready_handler)
 
-        if not self.__client.is_initialized():
-            raise ProviderNotReadyError(error_message="launchdarkly client initialization failed")
+        # The OpenFeature client reports the outcome of initialization itself, so the provider records the
+        # resulting status without emitting an event for it. The outcome is read and recorded, and initialization
+        # is completed, under the lock, so a concurrent status change either precedes the outcome it is included
+        # in or is emitted.
+        with self.__status_lock:
+            initialized = self.__client.is_initialized()
+            self.__provider_status = ProviderStatus.READY if initialized else ProviderStatus.ERROR
+            self.__initialization_complete.set()
 
-        # Listen to new status events and emit them.
-        self.__client.data_source_status_provider.add_listener(self.__handle_data_source_status)
-        self.__client.flag_tracker.add_listener(self.__handle_flag_change)
+        if not initialized:
+            raise ProviderNotReadyError(error_message="launchdarkly client initialization failed")
 
     def shutdown(self):
         self.__client.data_source_status_provider.remove_listener(self.__handle_data_source_status)
