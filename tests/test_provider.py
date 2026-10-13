@@ -16,7 +16,7 @@ from openfeature.track import TrackingEventDetails
 from openfeature import api
 
 from ld_openfeature import LaunchDarklyProvider, Config
-from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, RepeatedlyInterruptedDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource
+from tests.test_data_sources import FailingDataSource, InitializedThenFailingDataSource, NeverReadyDataSource, RepeatedlyInterruptedDataSource, StaleDataSource, UpdatingDataSource, DelayedFailingDataSource, DelayedReadyDataSource
 from ld_openfeature.version import VERSION
 
 
@@ -71,6 +71,63 @@ def test_initialization_fails_without_waiting_again_with_positive_start_wait():
 
     assert time.time() - started < 0.25
     provider.shutdown()
+
+
+def test_zero_start_wait_does_not_wait_for_the_data_source():
+    started = time.time()
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=NeverReadyDataSource, send_events=False),
+        start_wait=0,
+    )
+
+    with pytest.raises(ProviderNotReadyError):
+        provider.initialize(EvaluationContext("user-key"))
+
+    assert time.time() - started < 0.25
+    provider.shutdown()
+
+
+def test_no_start_wait_waits_for_the_data_source_during_initialization():
+    started = time.time()
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=DelayedReadyDataSource, send_events=False),
+        start_wait=None,
+    )
+    construction_finished = time.time()
+
+    provider.initialize(EvaluationContext("user-key"))
+
+    assert construction_finished - started < 0.1
+    assert time.time() - started >= 0.1
+    provider.shutdown()
+
+
+def test_ready_is_reported_after_initialization_failed():
+    thread_event = threading.Event()
+    emission_count = 0
+
+    def handle_status(details: EventDetails):
+        nonlocal emission_count
+        if details.provider_name == 'launchdarkly-openfeature-server':
+            emission_count += 1
+            thread_event.set()
+
+    api.add_handler(ProviderEvent.PROVIDER_READY, handle_status)
+
+    provider = LaunchDarklyProvider(
+        Config("", update_processor_class=DelayedReadyDataSource, send_events=False),
+        start_wait=0,
+    )
+
+    # Initialization fails because the data source is not ready yet, and the provider reports the later
+    # transition to a valid data source.
+    api.set_provider(provider)
+
+    assert thread_event.wait(timeout=5)
+    time.sleep(0.1)
+    assert emission_count == 1
+
+    api.shutdown()
 
 
 def test_provider_identifies_itself_as_the_wrapper(provider: LaunchDarklyProvider, config: Config):
