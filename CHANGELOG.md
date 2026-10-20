@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.3](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.2...0.8.3) (2026-10-20)
+
+
+### Bug Fixes
+
+* Require launchdarkly-server-sdk 9.18.3 or newer ([#69](https://github.com/launchdarkly/openfeature-python-server/issues/69)) ([dc04422](https://github.com/launchdarkly/openfeature-python-server/commit/dc0442271a041491977af3558b5c7f99871f9cf8))
+
 ## [0.8.2](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.1...0.8.2) (2026-10-02)
 
 
