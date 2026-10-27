@@ -41,7 +41,7 @@ class LaunchDarklyProvider(AbstractProvider):
         self.__client = LDClient(config.with_wrapper_information(WRAPPER_NAME, VERSION),
                                  0 if start_wait is None else start_wait)
         self.__start_wait = start_wait
-        self.__initialization_complete = threading.Event()
+        self.__initialization_complete = False
         self.__status_lock = threading.Lock()
         self.__provider_status = ProviderStatus.NOT_READY
 
@@ -69,7 +69,7 @@ class LaunchDarklyProvider(AbstractProvider):
             if status == self.__provider_status:
                 return False
             self.__provider_status = status
-            return self.__initialization_complete.is_set()
+            return self.__initialization_complete
 
     def __handle_data_source_status(self, status: DataSourceStatus):
         state = status.state
@@ -134,7 +134,7 @@ class LaunchDarklyProvider(AbstractProvider):
         with self.__status_lock:
             initialized = self.__client.is_initialized()
             self.__provider_status = ProviderStatus.READY if initialized else ProviderStatus.ERROR
-            self.__initialization_complete.set()
+            self.__initialization_complete = True
 
         if not initialized:
             raise ProviderNotReadyError(error_message="launchdarkly client initialization failed")
