@@ -48,6 +48,7 @@ class LaunchDarklyProvider(AbstractProvider):
         self.__context_converter = EvaluationContextConverter()
         self.__details_converter = ResolutionDetailsConverter()
 
+
     @property
     def client(self) -> LDClient:
         """
