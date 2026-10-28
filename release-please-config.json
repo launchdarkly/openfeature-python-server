@@ -3,6 +3,7 @@
     ".": {
       "release-type": "python",
       "versioning": "default",
+      "bump-minor-pre-major": true,
       "include-v-in-tag": false,
       "extra-files": ["docs/conf.py", "ld_openfeature/version.py"],
       "include-component-in-tag": false
