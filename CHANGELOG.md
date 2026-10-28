@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.3...0.9.0) (2026-10-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Use None rather than zero for indefinite initialization waiting ([#64](https://github.com/launchdarkly/openfeature-python-server/issues/64))
+
+### Bug Fixes
+
+* Use None rather than zero for indefinite initialization waiting ([#64](https://github.com/launchdarkly/openfeature-python-server/issues/64)) ([8bff7b3](https://github.com/launchdarkly/openfeature-python-server/commit/8bff7b3f30c054efe8da87e48eb4cd8bdd72ab20))
+
 ## [0.8.3](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.2...0.8.3) (2026-10-20)
 
 
