@@ -97,7 +97,8 @@ class EvaluationContextConverter:
             targeting_key = attributes.get('targetingKey')
 
             if targeting_key is not None and not isinstance(targeting_key, str):
-                continue
+                logger.warning("A non-string 'targetingKey' attribute was provided.")
+                targeting_key = None
 
             targeting_key = self.__get_targeting_key(targeting_key, key)
             single_context = self.__build_single_context(attributes, kind, targeting_key)

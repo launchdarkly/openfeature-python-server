@@ -52,7 +52,7 @@ def test_invalid_private_attribute_types_are_ignored(context_converter: Evaluati
     assert caplog.records[0].message == "'privateAttributes' must be an array of only string values"
 
 
-def test_create_multi_context_with_invalid_targeting_key(context_converter: EvaluationContextConverter):
+def test_create_multi_context_with_invalid_targeting_key(context_converter: EvaluationContextConverter, caplog):
     attributes: Mapping[str, EvaluationContextAttribute] = {
         'kind': 'multi',
         'user': {'targetingKey': False, 'key': 'user-key', 'name': 'User name'},
@@ -62,8 +62,31 @@ def test_create_multi_context_with_invalid_targeting_key(context_converter: Eval
     ld_context = context_converter.to_ld_context(context)
 
     assert ld_context.valid is True
-    assert ld_context.key == 'org-key'
-    assert ld_context.kind == 'org'
+    assert ld_context.multiple is True
+    user_context = ld_context.get_individual_context('user')
+    assert user_context is not None
+    assert user_context.key == 'user-key'
+    assert user_context.name == 'User name'
+    assert user_context.get('targetingKey') is None
+    org_context = ld_context.get_individual_context('org')
+    assert org_context is not None
+    assert org_context.key == 'org-key'
+
+    assert len(caplog.records) == 1
+    assert caplog.records[0].message == "A non-string 'targetingKey' attribute was provided."
+    assert caplog.records[0].levelname == 'WARNING'
+
+
+def test_multi_context_with_invalid_targeting_key_and_no_key_is_invalid(context_converter: EvaluationContextConverter):
+    attributes: Mapping[str, EvaluationContextAttribute] = {
+        'kind': 'multi',
+        'user': {'targetingKey': False, 'name': 'User name'},
+        'org': {'key': 'org-key', 'name': 'Org name'},
+    }
+    context = EvaluationContext(None, attributes)
+    ld_context = context_converter.to_ld_context(context)
+
+    assert ld_context.valid is False
 
 
 def test_create_context_with_only_key(context_converter: EvaluationContextConverter):
