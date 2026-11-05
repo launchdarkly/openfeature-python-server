@@ -52,7 +52,7 @@ class EvaluationContextConverter:
             return self.__build_multi_context(context)
 
         if kind is not None and not isinstance(kind, str):
-            logger.warning("'kind' was set to a non-string value; defaulting to user")
+            logger.error("'kind' was set to a non-string value; defaulting to user")
             kind = 'user'
 
         targeting_key = context.targeting_key
