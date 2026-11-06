@@ -110,7 +110,7 @@ context = EvaluationContext("the-key")
 #### A single context of kind "organization"
 
 ```python
-context = EvaluationContext("org-key", {"kind": "organization"});
+context = EvaluationContext("org-key", {"kind": "organization"})
 ```
 
 #### A multi-context containing a "user" and an "organization"
@@ -120,15 +120,15 @@ attributes = {
     "kind": "multi",
     "organization": {
         "name": "the-org-name",
-        "targetingKey", "my-org-key",
-        "myCustomAttribute", "myAttributeValue"
+        "targetingKey": "my-org-key",
+        "myCustomAttribute": "myAttributeValue",
     },
     "user": {
         "key": "my-user-key",
-        "anonymous", true
-    }
+        "anonymous": True,
+    },
 }
-context = EvaluationContext(null, attributes)
+context = EvaluationContext(None, attributes)
 ```
 
 #### Setting private attributes in a single context
@@ -147,7 +147,7 @@ context = EvaluationContext("org-key", attributes)
 
 ```python
 attributes = {
-    "kind": "organization",
+    "kind": "multi",
     "organization": {
         "name": "the-org-name",
         "targetingKey": "my-org-key",
@@ -156,15 +156,15 @@ attributes = {
         # This attribute will be private.
         "myCustomAttribute": "myAttributeValue",
     },
-    "user": [
+    "user": {
         "key": "my-user-key",
-        "anonymous" = > true,
+        "anonymous": True,
         # This attribute will not be private.
         "myCustomAttribute": "myAttributeValue",
-    ]
+    },
 }
 
-context = EvaluationContext(null, attributes)
+context = EvaluationContext(None, attributes)
 ```
 
 ### Flag Metadata
