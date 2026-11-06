@@ -237,6 +237,7 @@ def test_logger_changes_should_cascade_to_evaluation_converter(provider: LaunchD
 
     assert len(caplog.records) == 1
     assert caplog.records[0].message == "'kind' was set to a non-string value; defaulting to user"
+    assert caplog.records[0].levelname == 'ERROR'
 
 
 def test_track_without_context_does_not_send_an_event(provider: LaunchDarklyProvider):
