@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.9.0...0.9.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* Keep a multi-context kind whose targetingKey is not a string ([#77](https://github.com/launchdarkly/openfeature-python-server/issues/77)) ([d4dcdb3](https://github.com/launchdarkly/openfeature-python-server/commit/d4dcdb31fee5bf35004d6ede07d6ea6c4c6b4d30))
+* Log a non-string kind attribute as an error ([#76](https://github.com/launchdarkly/openfeature-python-server/issues/76)) ([3a48713](https://github.com/launchdarkly/openfeature-python-server/commit/3a487130e6ab686a76331999d37f84681e44eb09))
+
+
+### Documentation
+
+* Fix invalid Python in the README context examples ([#75](https://github.com/launchdarkly/openfeature-python-server/issues/75)) ([8dcdb7e](https://github.com/launchdarkly/openfeature-python-server/commit/8dcdb7ee8b9901ccad0722379c17b809b4fb7328))
+
 ## [0.9.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.8.3...0.9.0) (2026-10-28)
 
 
