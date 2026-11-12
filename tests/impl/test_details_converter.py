@@ -73,6 +73,20 @@ def test_flag_metadata_omits_in_experiment_for_non_experiment_evaluations(detail
     assert 'inExperiment' not in resolution_details.flag_metadata
 
 
+@pytest.mark.parametrize('reason', [{'kind': 'FALLTHROUGH'}, {'kind': 'ERROR', 'errorKind': 'MALFORMED_FLAG'}])
+def test_flag_metadata_includes_override_affected_when_true(reason: dict, details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, None, {**reason, 'overrideAffected': True})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {'overrideAffected': True}
+
+
+@pytest.mark.parametrize('reason', [{}, {'overrideAffected': False}, {'overrideAffected': None}, {'overrideAffected': 1}])
+def test_flag_metadata_omits_override_affected_when_not_true(reason: dict, details_converter: ResolutionDetailsConverter):
+    detail = EvaluationDetail(True, 1, {'kind': 'FALLTHROUGH', **reason})
+    resolution_details = details_converter.to_resolution_details(detail)
+    assert resolution_details.flag_metadata == {'variationIndex': 1}
+
+
 def test_flag_metadata_includes_the_rule_for_rule_matches(details_converter: ResolutionDetailsConverter):
     detail = EvaluationDetail(True, 1, {'kind': 'RULE_MATCH', 'ruleIndex': 2, 'ruleId': 'the-rule-id'})
     resolution_details = details_converter.to_resolution_details(detail)

@@ -10,6 +10,7 @@ from openfeature.flag_evaluation import (
 
 _VARIATION_INDEX_KEY = 'variationIndex'
 _IN_EXPERIMENT_KEY = 'inExperiment'
+_OVERRIDE_AFFECTED_KEY = 'overrideAffected'
 _RULE_INDEX_KEY = 'ruleIndex'
 _RULE_ID_KEY = 'ruleId'
 _PREREQUISITE_KEY_KEY = 'prerequisiteKey'
@@ -54,6 +55,9 @@ class ResolutionDetailsConverter:
 
         if reason.get('inExperiment') is True:
             metadata[_IN_EXPERIMENT_KEY] = True
+
+        if reason.get('overrideAffected') is True:
+            metadata[_OVERRIDE_AFFECTED_KEY] = True
 
         rule_index = reason.get('ruleIndex')
         if isinstance(rule_index, int):
