@@ -44,6 +44,7 @@ This matrix mirrors the [feature matrix of the OpenFeature SDK for Python](https
 | ✅      | Transaction Context Propagation | Provided by the OpenFeature SDK, which merges the transaction context into the evaluation context before the provider is called; no provider support is required.                                                          |
 | ✅      | Extending                       | The underlying LaunchDarkly client is available through the `client` property.                                                                                                                                            |
 | ✅      | Flag metadata                   | LaunchDarkly evaluation reason details are returned as OpenFeature flag metadata. See [Flag Metadata](#flag-metadata).                                                                                                     |
+| ✅      | Override-affected metadata      | `overrideAffected: True` is included in flag metadata only when an override affected the evaluation, directly or indirectly. Requires LaunchDarkly Python SDK 9.21.0 or later.                                            |
 
 <sub>Supported: ✅ | Partially supported: ⚠️ | Not supported: ❌</sub>
 
@@ -175,6 +176,7 @@ Evaluations include flag metadata for the LaunchDarkly specific parts of the eva
 |---------------------|---------|-------------------------------------------------------------------|
 | `variationIndex`    | integer | The index of the returned variation. Absent for default values.   |
 | `inExperiment`      | boolean | Present, and `True`, when the evaluation was part of an experiment.|
+| `overrideAffected`  | boolean | Present, and `True`, when an override affected the evaluation.     |
 | `ruleIndex`         | integer | The index of the rule that matched.                               |
 | `ruleId`            | string  | The identifier of the rule that matched.                          |
 | `prerequisiteKey`   | string  | The key of the prerequisite flag that failed.                     |
