@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/launchdarkly/openfeature-python-server/compare/0.9.1...0.10.0) (2026-11-17)
+
+
+### Features
+
+* include override-affected flag metadata ([#79](https://github.com/launchdarkly/openfeature-python-server/issues/79)) ([08c8f5d](https://github.com/launchdarkly/openfeature-python-server/commit/08c8f5d5a8f8d29f2e14f1df5719ab398ad022a1))
+
 ## [0.9.1](https://github.com/launchdarkly/openfeature-python-server/compare/0.9.0...0.9.1) (2026-11-06)
 
 
